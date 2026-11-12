@@ -10,7 +10,7 @@
 <body>
 <header class="top"><div class="brand">YOMI<span>BAKO</span></div><div class="spacer"></div><button id="addBtn" class="primary">＋ Añadir tomo</button><input id="fileInput" type="file" accept=".cbr,.rar,.cbz,.zip,.jpg,.jpeg,.png,.webp,.gif,.bmp,image/*" multiple></header>
 <main class="wrap"><section class="hero"><h1>Tu colección, en su lugar.</h1><div class="muted">Una estantería personal para tus mangas, cómics e historias favoritas.</div><div class="actions"><button class="primary" id="importBtn">＋ Añadir tomos</button><button id="createShelfBtn">＋ Crear estante</button><button id="installBtn" class="hidden">Instalar aplicación</button></div><div class="tools"><button id="exportBtn">↓ Respaldar biblioteca</button><button id="backupInputBtn">↑ Restaurar respaldo</button><input id="backupInput" type="file" accept="application/json,.json" class="hidden"></div><div class="notice">Los mangas se procesan en tu navegador. No subas tus archivos CBR/CBZ a GitHub: este sitio solo contiene el lector.</div></section>
-<div class="stats"><div class="stat"><b id="totalStat">0</b> tomos</div><div class="stat"><b id="seriesStat">0</b> series</div><div class="stat"><b id="readingStat">0</b> leyendo</div><div class="stat"><b id="doneStat">0</b> terminados</div></div><div class="shelfbar" id="shelfBar"></div><div class="collectionhead"><button id="backToShelves" class="hidden">← Estantes</button><div><strong id="collectionHeading">Mis estantes</strong><div class="muted" id="collectionSub">Tus series organizadas como una biblioteca.</div></div></div><div class="toolbar"><input id="search" placeholder="Buscar en tu biblioteca…"><select id="statusFilter"><option value="all">Todos los estados</option><option value="reading">Leyendo</option><option value="planned">Pendientes</option><option value="completed">Terminados</option></select><select id="genreFilter"><option value="all">Todos los géneros</option></select><span class="muted" id="count">0 mangas</span></div><section id="library" class="grid"></section><section id="empty" class="empty"><div style="font-size:38px;margin-bottom:10px">▤</div><strong>Tu estantería está esperando nuevas historias</strong><p>Importa tus tomos y organízalos por serie y estante.</p></section></main>
+<div class="stats"><div class="stat"><b id="totalStat">0</b> tomos</div><div class="stat"><b id="seriesStat">0</b> series</div><div class="stat"><b id="readingStat">0</b> leyendo</div><div class="stat"><b id="doneStat">0</b> terminados</div></div><div class="shelfbar" id="shelfBar"></div><div class="collectionhead"><button id="backToShelves" class="hidden">← Estantes</button><div><strong id="collectionHeading">Mis estantes</strong><div class="muted" id="collectionSub">Tus series organizadas como una biblioteca.</div></div><div class="spacer"></div><button id="deleteSeriesBtn" class="hidden" style="border-color:#8d4545;color:#ff9b9b">Eliminar manga</button></div><div class="toolbar"><input id="search" placeholder="Buscar en tu biblioteca…"><select id="statusFilter"><option value="all">Todos los estados</option><option value="reading">Leyendo</option><option value="planned">Pendientes</option><option value="completed">Terminados</option></select><select id="genreFilter"><option value="all">Todos los géneros</option></select><span class="muted" id="count">0 mangas</span></div><section id="library" class="grid"></section><section id="empty" class="empty"><div style="font-size:38px;margin-bottom:10px">▤</div><strong>Tu estantería está esperando nuevas historias</strong><p>Importa tus tomos y organízalos por serie y estante.</p></section></main>
 <section class="modal" id="editModal"><div class="dialog"><h2>Detalles del manga</h2><form id="editForm"><label class="field">Título<input id="metaTitle" maxlength="120" required></label><label class="field">Serie / colección<input id="metaSeries" maxlength="120" placeholder="Ej. GANTZ"></label><label class="field">Estante<input id="metaShelf" maxlength="80" placeholder="Ej. Horror"></label><label class="field">Autor<input id="metaAuthor" maxlength="100" placeholder="Autor o autora"></label><label class="field">Género<input id="metaGenre" maxlength="60" placeholder="Ej. horror, ciencia ficción"></label><label class="field">Estado<select id="metaStatus"><option value="reading">Leyendo</option><option value="planned">Pendiente</option><option value="completed">Terminado</option></select></label><label class="field">Notas<textarea id="metaNotes" maxlength="500" placeholder="Notas personales…"></textarea></label><label><input id="metaFavorite" type="checkbox"> ★ Favorito</label><div class="dialogactions"><button type="button" id="cancelEdit">Cancelar</button><button class="primary" type="submit">Guardar</button></div></form></div></section><section class="reader" id="reader"><div class="readbar"><button id="closeReader">← Biblioteca</button><div class="name" id="readerTitle"></div><div class="spacer"></div><button id="directionBtn">←→</button></div><div class="pagearea" id="pageArea"><img id="pageImage" alt="Página del manga"></div><div class="readfoot"><button id="prev">‹</button><span class="progress" id="pageCount">0 / 0</span><button id="next">›</button></div></section>
 <script type="module">
 const $ = (s) => document.querySelector(s);
@@ -170,6 +170,7 @@ function render() {
   $('#backToShelves').classList.toggle('hidden', !activeSeries);
   $('#collectionHeading').textContent = activeSeries || (activeShelf === 'Todos' ? 'Mis estantes' : activeShelf);
   $('#collectionSub').textContent = activeSeries ? 'Tomos de esta serie · abre cualquiera para continuar leyendo.' : 'Cada serie aparece una sola vez. Entra para ver sus tomos.';
+  $('#deleteSeriesBtn').classList.toggle('hidden', !activeSeries);
   $('#count').textContent = activeSeries ? visibleBooks.length + ' tomos' : '';
   $('#empty').classList.toggle('hidden', books.length > 0);
 
@@ -178,7 +179,7 @@ function render() {
       const card=document.createElement('article'); card.className='card';
       const currentPage=Math.max(1,Math.min(book.last||1,book.pages||1));
       const percent=book.pages?Math.round(currentPage/book.pages*100):0;
-      card.innerHTML='<div class="cover"><span class="cover-placeholder">▤</span><img class="cover-image hidden" alt="" loading="lazy"></div><div class="info"><strong></strong><small class="page-label"></small><div class="progressline"><i></i></div><small class="percent-label"></small><div class="meta"></div><div class="cardtools"><button class="editMeta">Editar detalles</button><button class="favMeta"></button></div></div>';
+      card.innerHTML='<div class="cover"><span class="cover-placeholder">▤</span><img class="cover-image hidden" alt="" loading="lazy"></div><div class="info"><strong></strong><small class="page-label"></small><div class="progressline"><i></i></div><small class="percent-label"></small><div class="meta"></div><div class="cardtools"><button class="editMeta">Editar detalles</button><button class="favMeta"></button><button class="deleteVolume" style="border-color:#8d4545;color:#ff9b9b">Eliminar tomo</button></div></div>';
       card.querySelector('strong').textContent=book.title;
       card.querySelector('.page-label').textContent='Página '+currentPage+' de '+(book.pages||0);
       card.querySelector('.progressline i').style.width=percent+'%';
@@ -187,6 +188,7 @@ function render() {
       const fav=card.querySelector('.favMeta'); fav.textContent=book.favorite?'★ Favorito':'☆ Favorito';
       fav.onclick=e=>{e.stopPropagation();book.favorite=!book.favorite;saveLibrary();};
       card.querySelector('.editMeta').onclick=e=>{e.stopPropagation();editBook(book.id);};
+      card.querySelector('.deleteVolume').onclick=async e=>{e.stopPropagation();await removeBook(book.id);};
       card.onclick=()=>openBook(book.id);
       grid.append(card); loadCover(book,card.querySelector('.cover-image'),card.querySelector('.cover-placeholder'));
     }
@@ -213,6 +215,57 @@ function render() {
   $('#empty').classList.toggle('hidden', grid.children.length > 0);
 }
 $('#backToShelves').onclick=()=>{activeSeries=null;render();};
+
+async function removeBook(bookId) {
+  const book = books.find(item => item.id === bookId);
+  if (!book) return;
+  if (!confirm(`¿Eliminar el tomo "${book.title}"?\\n\\nSe borrarán sus ${book.pages || 0} páginas guardadas en este dispositivo. Esta acción no se puede deshacer.`)) return;
+  try {
+    const refs = await getBookRefs(book);
+    for (const ref of refs) if (ref.key) await idbDelete('pageBlobs', ref.key);
+    await idbDelete('pages', bookId);
+    books = books.filter(item => item.id !== bookId);
+    if (active?.id === bookId) {
+      $('#reader').classList.remove('show');
+      active = null;
+      if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
+      currentObjectUrl = null;
+    }
+    saveLibrary();
+  } catch (error) {
+    console.error(error);
+    alert('No se pudo eliminar el tomo: ' + (error.message || error));
+  }
+}
+
+$('#deleteSeriesBtn').onclick = async () => {
+  if (!activeSeries) return;
+  const seriesName = activeSeries;
+  const volumes = books.filter(book => (book.series || inferSeries(book.title)) === seriesName);
+  if (!volumes.length) return;
+  const pageTotal = volumes.reduce((sum, book) => sum + (book.pages || 0), 0);
+  if (!confirm(`¿Eliminar la colección "${seriesName}" completa?\\n\\nSe eliminarán ${volumes.length} tomos y ${pageTotal} páginas guardadas en este dispositivo. Esta acción no se puede deshacer.`)) return;
+  try {
+    for (const book of volumes) {
+      const refs = await getBookRefs(book);
+      for (const ref of refs) if (ref.key) await idbDelete('pageBlobs', ref.key);
+      await idbDelete('pages', book.id);
+    }
+    const ids = new Set(volumes.map(book => book.id));
+    books = books.filter(book => !ids.has(book.id));
+    if (active && ids.has(active.id)) {
+      $('#reader').classList.remove('show');
+      active = null;
+      if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
+      currentObjectUrl = null;
+    }
+    activeSeries = null;
+    saveLibrary();
+  } catch (error) {
+    console.error(error);
+    alert('No se pudo eliminar toda la colección: ' + (error.message || error));
+  }
+};
 $('#createShelfBtn').onclick=()=>{
   const name=prompt('Nombre del nuevo estante (por ejemplo: Horror, Sci-fi, Lecturas pendientes):');
   if(!name || !name.trim()) return;
