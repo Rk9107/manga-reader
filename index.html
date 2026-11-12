@@ -1281,8 +1281,10 @@ document.addEventListener('keydown', event => {
   if (event.key === ' ') { event.preventDefault(); $('#reader').classList.toggle('controls-hidden'); if (!$('#reader').classList.contains('controls-hidden')) revealReaderControls(); }
 });
 
+let mangaSelectionInProgress = false;
 async function handleMangaFileSelection(event) {
-  const input = event.currentTarget;
+  const input = event.currentTarget || event.target;
+  if (mangaSelectionInProgress) return;
   const selected = Array.from(input.files || []);
   const inputId = input.id || 'selector';
   if (!selected.length) {
@@ -1290,7 +1292,8 @@ async function handleMangaFileSelection(event) {
     return;
   }
   const file = selected[0];
-  setStatus(`Android entregó el archivo: ${file.name} · ${(file.size / 1048576).toFixed(1)} MB. Leyendo archivo…`, 1);
+  mangaSelectionInProgress = true;
+  setStatus(`TORII recibió: ${file.name} · ${(file.size / 1048576).toFixed(1)} MB. Iniciando importación…`, 1);
   console.info('[TORII] selección recibida', { inputId, name: file.name, size: file.size, type: file.type });
   try {
     await importFiles(selected);
@@ -1299,9 +1302,12 @@ async function handleMangaFileSelection(event) {
     setStatus(`FALLO TORII: ${error?.message || String(error)}`, null);
   } finally {
     input.value = '';
+    mangaSelectionInProgress = false;
   }
 }
-$('#fileInput').addEventListener('change', handleMangaFileSelection);
+const mangaFileInput = $('#fileInput');
+mangaFileInput.addEventListener('input', handleMangaFileSelection);
+mangaFileInput.addEventListener('change', handleMangaFileSelection);
 window.addEventListener('error', event => {
   console.error('[TORII] error de interfaz', event.error || event.message);
   setStatus(`Error de TORII: ${event.message || 'revisa la consola'}`, null);
