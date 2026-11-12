@@ -168,6 +168,9 @@ button.primary{background:#aaa9ad;color:#101012}
     <div class="spacer"></div>
     <button id="directionBtn" title="Cambiar sentido de lectura">RTL</button>
     <button id="fitBtn" title="Cambiar ajuste de página">Ajuste</button>
+    <button id="zoomOutBtn" title="Reducir zoom">−</button>
+    <button id="zoomResetBtn" title="Restablecer zoom">100%</button>
+    <button id="zoomInBtn" title="Aumentar zoom">+</button>
     <button id="pagesBtn" title="Mostrar miniaturas">Páginas</button>
     <button id="verticalBtn" title="Cambiar modo de lectura">Vertical</button>
     <button id="fullscreenBtn" title="Pantalla completa">⛶</button>
@@ -785,6 +788,17 @@ function setVerticalMode(enabled){
 $('#pagesBtn').onclick=()=>{if($('#thumbnailTray').classList.contains('hidden'))openThumbnails();else $('#thumbnailTray').classList.add('hidden');revealReaderControls();};
 $('#closeThumbnails').onclick=()=>$('#thumbnailTray').classList.add('hidden');
 $('#verticalBtn').onclick=()=>{setVerticalMode(!readerVertical);revealReaderControls();};
+function changeZoom(delta){
+  zoomScale=Math.max(1,Math.min(4,+(zoomScale+delta).toFixed(2)));
+  if(zoomScale===1){zoomX=0;zoomY=0;}
+  applyZoom();
+  $('#zoomResetBtn').textContent=Math.round(zoomScale*100)+'%';
+  revealReaderControls();
+}
+$('#zoomInBtn').onclick=()=>changeZoom(.25);
+$('#zoomOutBtn').onclick=()=>changeZoom(-.25);
+$('#zoomResetBtn').onclick=()=>{resetZoom();$('#zoomResetBtn').textContent='100%';revealReaderControls();};
+
 $('#pageImage').addEventListener('touchstart',e=>{
   if(e.touches.length===2){pinchStart=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);pinchScale=zoomScale;}
 },{passive:true});
