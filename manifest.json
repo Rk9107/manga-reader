@@ -4,8 +4,8 @@
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#aaa9ad",
-  "theme_color": "#aaa9ad",
+  "background_color": "#080808",
+  "theme_color": "#080808",
   "description": "Tu estantería personal para manga y cómics.",
   "icons": [
     {
