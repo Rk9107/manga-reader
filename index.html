@@ -75,34 +75,50 @@ function natural(a, b) {
 }
 
 async function loadCover(book, image, placeholder) {
+  let objectUrl = null;
   try {
     const refs = await getBookRefs(book);
     if (!refs.length) return;
-    let src;
-    if (refs[0].legacyData) {
-      src = refs[0].legacyData;
-    } else {
+
+    let src = refs[0].legacyData || '';
+    if (!src) {
       const blob = await idbGet('pageBlobs', refs[0].key);
-      if (!blob) return;
-      src = URL.createObjectURL(blob);
-      coverObjectUrls.add(src);
+      if (!blob) throw new Error('No se encontró la primera página en IndexedDB.');
+      objectUrl = URL.createObjectURL(blob);
+      coverObjectUrls.add(objectUrl);
+      src = objectUrl;
     }
-    image.onload = () => {
-      image.classList.remove('hidden');
-      placeholder.classList.add('hidden');
-    };
-    image.onerror = () => {
-      image.classList.add('hidden');
-      placeholder.classList.remove('hidden');
-    };
-    image.src = src;
+
     image.alt = `Portada de ${book.title}`;
-    if (image.complete && image.naturalWidth > 0) {
+    image.loading = 'eager';
+    image.decoding = 'async';
+    image.src = src;
+
+    // decode() permite detectar fallos reales de lectura antes de ocultar
+    // el marcador de portada. También evita depender únicamente de onload.
+    if (typeof image.decode === 'function') {
+      await image.decode();
+    } else if (!image.complete) {
+      await new Promise((resolve, reject) => {
+        image.onload = resolve;
+        image.onerror = () => reject(new Error('El navegador no pudo decodificar la portada.'));
+      });
+    }
+
+    if (image.naturalWidth > 0) {
       image.classList.remove('hidden');
       placeholder.classList.add('hidden');
+    } else {
+      throw new Error('La primera página no contiene una imagen válida.');
     }
   } catch (error) {
+    image.classList.add('hidden');
+    placeholder.classList.remove('hidden');
     console.warn('No se pudo cargar la portada de', book.title, error);
+    if (objectUrl) {
+      coverObjectUrls.delete(objectUrl);
+      URL.revokeObjectURL(objectUrl);
+    }
   }
 }
 
