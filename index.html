@@ -289,6 +289,7 @@ try{
   readingStats={...readingStats,...(embedded||{}),...(stored||{})};
 }catch{}
 readingStats.visited=readingStats.visited||{};readingStats.dailyPages=readingStats.dailyPages||{};readingStats.dailySeconds=readingStats.dailySeconds||{};readingStats.activeDays=readingStats.activeDays||{};
+readingStats.dailyVisited=readingStats.dailyVisited||{};
 function persistReadingStats(){
   try{localStorage.setItem(readingStatsKey,JSON.stringify(readingStats));}catch{}
   if(books.length){books[0]._toriiReadingStats=readingStats;localStorage.setItem(libraryKey,JSON.stringify(books));}
@@ -309,7 +310,10 @@ function recordPageRead(book,pageIndex){
   const day=localDayKey(),key=String(book.id);
   const seen=readingStats.visited[key]||(readingStats.visited[key]=[]);
   if(!seen.includes(pageIndex)){seen.push(pageIndex);readingStats.pagesRead++;}
-  readingStats.dailyPages[day]=(readingStats.dailyPages[day]||0)+1;
+  const dailyBookPages=readingStats.dailyVisited[day]||(readingStats.dailyVisited[day]={});
+  const dailySeen=dailyBookPages[key]||(dailyBookPages[key]=[]);
+  if(!dailySeen.includes(pageIndex)){dailySeen.push(pageIndex);}
+  readingStats.dailyPages[day]=Object.values(dailyBookPages).reduce((sum,pages)=>sum+pages.length,0);
   readingStats.activeDays[day]=true;
   saveReadingStats();
 }
@@ -344,8 +348,9 @@ function renderActivity(){
   $('#activityDays').textContent=Object.keys(readingStats.activeDays).filter(k=>readingStats.activeDays[k]).length;
   $('#activityWeek').innerHTML='';
   for(const d of days){const count=readingStats.dailyPages[d.key]||0;const item=document.createElement('div');item.className='activity-day';const bar=document.createElement('i');bar.style.height=Math.max(3,Math.round(count/max*58))+'px';bar.title=count+' páginas';const label=document.createElement('span');label.textContent=d.label;item.append(bar,label);$('#activityWeek').append(item);}
-  $('#activityNote').textContent='Últimos 7 días · '+days.reduce((n,d)=>n+(readingStats.dailyPages[d.key]||0),0)+' páginas leídas';
+  $('#activityNote').textContent='Últimos 7 días · '+days.reduce((n,d)=>n+(readingStats.dailyPages[d.key]||0),0)+' páginas únicas leídas';
 }
+renderActivity();
 function markCompletedAtEnd(book,total,currentPage){
   if(!book || !total || currentPage < total-1 || book.status==='completed') return false;
   book.status='completed';
