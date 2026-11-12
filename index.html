@@ -82,12 +82,76 @@ button.primary{background:#aaa9ad;color:#101012}
 .hero-kicker{color:#e5b7c8}
 .hero .notice{background:rgba(8,8,10,.68);border-color:#ffffff24;color:#e4e2e5}
 @media(max-width:700px){.hero{min-height:220px;background-position:55% center;padding:22px 18px}.hero-content{max-width:88%}}
+
+/* TORII immersive reader v1 */
+.reader{background:#030304;color:#f2f1f3;overscroll-behavior:contain}
+.reader .readbar{min-height:58px;padding:9px 14px;gap:9px;background:rgba(10,10,12,.96);backdrop-filter:blur(14px);border-bottom:1px solid #29292f;z-index:2}
+.reader .readbar button,.reader .readfoot button{border:1px solid #3b3b42;background:#19191d;color:#e9e8eb;border-radius:10px;padding:9px 13px;min-width:42px}
+.reader-heading{min-width:0;display:flex;flex-direction:column;gap:2px}
+.reader-heading .name{font-weight:700;max-width:min(42vw,560px);font-size:14px}
+.reader-heading small{font-size:10px;color:#aaa9ad;letter-spacing:.08em;text-transform:uppercase}
+.reader .pagearea{position:relative;overflow:hidden;background:#030304;touch-action:pan-y;display:flex;align-items:center;justify-content:center}
+.reader .pagearea img{display:block;width:auto;height:auto;max-width:100%;max-height:100%;object-fit:contain;pointer-events:none}
+.reader.fit-width .pagearea img{width:100%;height:auto;max-width:100%;max-height:none}
+.reader.fit-height .pagearea img{height:100%;width:auto;max-height:100%;max-width:none}
+.reader.fit-contain .pagearea img{width:auto;height:auto;max-width:100%;max-height:100%}
+.reader .page-zone{position:absolute;z-index:1;top:0;bottom:0;width:22%;border:0!important;background:transparent!important;opacity:0;min-width:0!important;padding:0!important}
+.reader .page-zone-prev{left:0}.reader .page-zone-next{right:0}
+.reader .readfoot{min-height:64px;gap:14px;padding:9px 16px;background:rgba(10,10,12,.97);border-top:1px solid #29292f;z-index:2}
+.reader-progress{width:min(460px,58vw);display:grid;gap:5px}
+.reader-progress-top{display:flex;justify-content:space-between;color:#c7c6ca;font-size:12px;font-variant-numeric:tabular-nums}
+#pageSeek{width:100%;accent-color:#aaa9ad;height:5px;cursor:pointer}
+.reader-hint{position:absolute;bottom:76px;left:50%;transform:translateX(-50%);padding:7px 12px;border-radius:99px;background:#111d;color:#d0cfd2;font-size:11px;white-space:nowrap;pointer-events:none;opacity:.8;transition:opacity .25s}
+.reader.controls-hidden .readbar,.reader.controls-hidden .readfoot,.reader.controls-hidden .reader-hint{opacity:0;pointer-events:none}
+.reader .readbar,.reader .readfoot{transition:opacity .22s}
+.reader-loading{position:absolute;z-index:3;bottom:18px;left:50%;transform:translateX(-50%);background:#111d;padding:7px 12px;border-radius:99px;font-size:12px}
+.reader:fullscreen{width:100vw;height:100dvh}
+@media(max-width:600px){
+ .reader .readbar{min-height:54px;padding:7px 8px;gap:5px}
+ .reader .readbar button{padding:8px 9px;font-size:12px}
+ .reader-heading .name{max-width:34vw;font-size:12px}
+ .reader-heading small{font-size:9px}
+ .reader .readfoot{min-height:58px;padding:8px 10px;gap:9px}
+ .reader .readfoot button{min-width:40px;padding:8px}
+ .reader-progress{width:min(60vw,340px)}
+ .reader-hint{bottom:66px;font-size:10px}
+}
+@media(orientation:landscape) and (max-height:520px){
+ .reader .readbar{min-height:42px;padding:4px 8px}
+ .reader .readfoot{min-height:46px;padding:4px 8px}
+ .reader .readbar button{padding:5px 8px}
+ .reader-hint{bottom:50px}
+}
 </style></head>
 <body>
 <aside class="sidebar"><div class="sidebar-brand"><img src="icon.svg" alt=""><div><strong>TORII</strong><small>La puerta a otros mundos</small></div></div><nav class="side-nav" aria-label="Navegación principal"><a href="#library" data-view="library" class="active"><span>▦</span> Biblioteca</a><a href="#shelfBar" data-view="shelves"><span>▤</span> Estantes</a><a href="#library" data-view="series"><span>▧</span> Series</a><a href="#library" data-view="reading"><span>◷</span> Lecturas</a><a href="#backup" data-view="downloads"><span>↓</span> Respaldos</a><a href="#settings" data-view="settings"><span>⚙</span> Ajustes</a></nav><div class="side-note">Un espacio personal para explorar historias.<br><span style="color:#eee">静かに読もう · Lee a tu ritmo.</span></div></aside><header class="top"><div class="brand"><img src="icon.svg" alt=""><span>TORII</span></div><div class="spacer"></div><button id="addBtn" class="primary">＋ Añadir tomo</button><input id="fileInput" type="file" accept=".cbr,.rar,.cbz,.zip,.jpg,.jpeg,.png,.webp,.gif,.bmp,image/*" multiple></header>
 <main class="wrap"><section class="hero"><div class="hero-content"><div class="hero-kicker">TORII · TU BIBLIOTECA PERSONAL</div><h1>Tu colección, en su lugar.</h1><div class="muted">Una estantería personal para tus mangas, cómics e historias favoritas.</div><div class="actions"><button class="primary" id="importBtn">＋ Añadir tomos</button><button id="createShelfBtn">＋ Crear estante</button><button id="installBtn" class="hidden">Instalar aplicación</button></div><div class="tools"><button id="exportBtn">↓ Respaldar biblioteca</button><button id="backupInputBtn">↑ Restaurar respaldo</button><input id="backupInput" type="file" accept="application/json,.json" class="hidden"></div><div class="notice">Los mangas se procesan en tu navegador. No subas tus archivos CBR/CBZ a GitHub: este sitio solo contiene el lector.</div></div></section>
 <div class="stats"><div class="stat"><b id="totalStat">0</b> tomos</div><div class="stat"><b id="seriesStat">0</b> series</div><div class="stat"><b id="readingStat">0</b> leyendo</div><div class="stat"><b id="doneStat">0</b> terminados</div></div><div class="shelfbar" id="shelfBar"></div><div class="collectionhead"><button id="backToShelves" class="hidden">← Estantes</button><div><strong id="collectionHeading">Mis estantes</strong><div class="muted" id="collectionSub">Tus series organizadas como una biblioteca.</div></div><div class="spacer"></div><button id="deleteSeriesBtn" class="hidden" style="border-color:#8d4545;color:#ff9b9b">Eliminar manga</button></div><div class="toolbar"><input id="search" placeholder="Buscar en tu biblioteca…"><select id="statusFilter"><option value="all">Todos los estados</option><option value="reading">Leyendo</option><option value="planned">Pendientes</option><option value="completed">Terminados</option></select><select id="genreFilter"><option value="all">Todos los géneros</option></select><span class="muted" id="count">0 mangas</span></div><section id="library" class="grid"></section><section id="empty" class="empty"><div style="font-size:38px;margin-bottom:10px">▤</div><strong>Tu estantería está esperando nuevas historias</strong><p>Importa tus tomos y organízalos por serie y estante.</p></section></main>
-<section class="modal" id="editModal"><div class="dialog"><h2>Detalles del manga</h2><form id="editForm"><label class="field">Título<input id="metaTitle" maxlength="120" required></label><label class="field">Serie / colección<input id="metaSeries" maxlength="120" placeholder="Ej. GANTZ"></label><label class="field">Estante<input id="metaShelf" maxlength="80" placeholder="Ej. Horror"></label><label class="field">Autor<input id="metaAuthor" maxlength="100" placeholder="Autor o autora"></label><label class="field">Género<input id="metaGenre" maxlength="60" placeholder="Ej. horror, ciencia ficción"></label><label class="field">Estado<select id="metaStatus"><option value="reading">Leyendo</option><option value="planned">Pendiente</option><option value="completed">Terminado</option></select></label><label class="field">Notas<textarea id="metaNotes" maxlength="500" placeholder="Notas personales…"></textarea></label><label><input id="metaFavorite" type="checkbox"> ★ Favorito</label><div class="dialogactions"><button type="button" id="cancelEdit">Cancelar</button><button class="primary" type="submit">Guardar</button></div></form></div></section><section class="reader" id="reader"><div class="readbar"><button id="closeReader">← Biblioteca</button><div class="name" id="readerTitle"></div><div class="spacer"></div><button id="directionBtn">←→</button></div><div class="pagearea" id="pageArea"><img id="pageImage" alt="Página del manga"></div><div class="readfoot"><button id="prev">‹</button><span class="progress" id="pageCount">0 / 0</span><button id="next">›</button></div></section>
+<section class="modal" id="editModal"><div class="dialog"><h2>Detalles del manga</h2><form id="editForm"><label class="field">Título<input id="metaTitle" maxlength="120" required></label><label class="field">Serie / colección<input id="metaSeries" maxlength="120" placeholder="Ej. GANTZ"></label><label class="field">Estante<input id="metaShelf" maxlength="80" placeholder="Ej. Horror"></label><label class="field">Autor<input id="metaAuthor" maxlength="100" placeholder="Autor o autora"></label><label class="field">Género<input id="metaGenre" maxlength="60" placeholder="Ej. horror, ciencia ficción"></label><label class="field">Estado<select id="metaStatus"><option value="reading">Leyendo</option><option value="planned">Pendiente</option><option value="completed">Terminado</option></select></label><label class="field">Notas<textarea id="metaNotes" maxlength="500" placeholder="Notas personales…"></textarea></label><label><input id="metaFavorite" type="checkbox"> ★ Favorito</label><div class="dialogactions"><button type="button" id="cancelEdit">Cancelar</button><button class="primary" type="submit">Guardar</button></div></form></div></section><section class="reader fit-contain" id="reader" aria-label="Lector de manga">
+  <div class="readbar" id="readerBar">
+    <button id="closeReader" title="Volver a la biblioteca">← <span>Biblioteca</span></button>
+    <div class="reader-heading"><div class="name" id="readerTitle"></div><small id="readerSubtitle">Lectura inmersiva</small></div>
+    <div class="spacer"></div>
+    <button id="directionBtn" title="Cambiar sentido de lectura">RTL</button>
+    <button id="fitBtn" title="Cambiar ajuste de página">Ajuste</button>
+    <button id="fullscreenBtn" title="Pantalla completa">⛶</button>
+  </div>
+  <div class="pagearea" id="pageArea">
+    <button class="page-zone page-zone-prev" id="tapPrev" aria-label="Página anterior"></button>
+    <img id="pageImage" alt="Página del manga" draggable="false">
+    <button class="page-zone page-zone-next" id="tapNext" aria-label="Página siguiente"></button>
+    <div class="reader-loading hidden" id="readerLoading">Cargando página…</div>
+  </div>
+  <div class="readfoot" id="readerFoot">
+    <button id="prev" aria-label="Página anterior">‹</button>
+    <div class="reader-progress">
+      <div class="reader-progress-top"><span id="pageCount">0 / 0</span><span id="pagePercent">0%</span></div>
+      <input id="pageSeek" type="range" min="1" max="1" value="1" step="1" aria-label="Avance de lectura">
+    </div>
+    <button id="next" aria-label="Página siguiente">›</button>
+  </div>
+  <div class="reader-hint" id="readerHint">Toca los lados para avanzar · Desliza para cambiar de página · Esc para salir</div>
+</section>
 <script type="module">
 const $ = (s) => document.querySelector(s);
 let books = [], active = null, page = 0, rtl = true, currentObjectUrl = null, editingBookId = null, activeShelf = "Todos", activeSeries = null;
@@ -598,16 +662,43 @@ async function getBookRefs(book) {
 }
 
 let readerControlsTimer = null;
+let fitMode = 'contain';
+let seekChanging = false;
 function revealReaderControls() {
   const reader = $('#reader');
   reader.classList.remove('controls-hidden');
   if (readerControlsTimer) clearTimeout(readerControlsTimer);
   readerControlsTimer = setTimeout(() => {
     if (reader.classList.contains('show')) reader.classList.add('controls-hidden');
-  }, 2800);
+  }, 3200);
 }
-$('#pageArea').addEventListener('click', revealReaderControls);
-$('#reader').addEventListener('mousemove', revealReaderControls, {passive:true});
+function setFitMode(mode) {
+  fitMode = mode;
+  const reader = $('#reader');
+  reader.classList.remove('fit-contain','fit-width','fit-height');
+  reader.classList.add('fit-' + mode);
+  $('#fitBtn').textContent = mode === 'contain' ? 'Ajuste' : mode === 'width' ? 'Ancho' : 'Alto';
+  $('#fitBtn').title = 'Ajuste actual: ' + $('#fitBtn').textContent + '. Toca para cambiar.';
+}
+function updateReaderProgress(total) {
+  $('#pageCount').textContent = `${page + 1} / ${total}`;
+  $('#pagePercent').textContent = `${Math.round(((page + 1) / total) * 100)}%`;
+  $('#pageSeek').max = String(total);
+  $('#pageSeek').value = String(page + 1);
+  $('#pageSeek').disabled = total <= 1;
+}
+$('#pageArea').addEventListener('click', event => {
+  if ($('#reader').classList.contains('controls-hidden')) {
+    const bounds = $('#pageArea').getBoundingClientRect();
+    const x = event.clientX - bounds.left;
+    if (x < bounds.width * .34) turn(rtl ? 1 : -1);
+    else if (x > bounds.width * .66) turn(rtl ? -1 : 1);
+    else revealReaderControls();
+  } else revealReaderControls();
+});
+$('#reader').addEventListener('mousemove', () => {
+  if (window.matchMedia('(hover:hover)').matches) revealReaderControls();
+}, {passive:true});
 $('#reader').addEventListener('touchstart', revealReaderControls, {passive:true});
 
 async function openBook(id) {
@@ -618,45 +709,106 @@ async function openBook(id) {
     alert('No encuentro las páginas guardadas. Vuelve a importar el archivo original.');
     return;
   }
-  page = Math.max(0, (active.last || 1) - 1);
+  page = Math.max(0, Math.min(refs.length - 1, (active.last || 1) - 1));
   $('#readerTitle').textContent = active.title;
+  $('#readerSubtitle').textContent = active.author ? active.author + ' · TORII' : 'Lectura inmersiva · TORII';
   $('#reader').classList.add('show');
+  $('#reader').classList.remove('controls-hidden');
+  setFitMode(fitMode);
   revealReaderControls();
   await showPage();
 }
-
 async function showPage() {
   if (!active) return;
   const refs = await getBookRefs(active);
   if (!refs.length) return;
   page = Math.max(0, Math.min(page, refs.length - 1));
   const ref = refs[page];
-
+  $('#readerLoading').classList.remove('hidden');
   if (currentObjectUrl) {
     URL.revokeObjectURL(currentObjectUrl);
     currentObjectUrl = null;
   }
-  if (ref.legacyData) {
-    $('#pageImage').src = ref.legacyData;
-  } else {
-    const blob = await idbGet('pageBlobs', ref.key);
-    if (!blob) {
-      alert('No se encontró esta página en el almacenamiento local.');
-      return;
+  try {
+    if (ref.legacyData) {
+      $('#pageImage').src = ref.legacyData;
+    } else {
+      const blob = await idbGet('pageBlobs', ref.key);
+      if (!blob) throw new Error('No se encontró esta página en el almacenamiento local.');
+      currentObjectUrl = URL.createObjectURL(blob);
+      $('#pageImage').src = currentObjectUrl;
     }
-    currentObjectUrl = URL.createObjectURL(blob);
-    $('#pageImage').src = currentObjectUrl;
+    $('#pageImage').alt = `${active.title}, página ${page + 1}`;
+    updateReaderProgress(refs.length);
+    active.last = page + 1;
+    localStorage.setItem(libraryKey, JSON.stringify(books));
+  } catch (error) {
+    alert(error.message || 'No se pudo cargar la página.');
+  } finally {
+    $('#readerLoading').classList.add('hidden');
   }
-
-  $('#pageCount').textContent = `${page + 1} / ${refs.length}`;
-  active.last = page + 1;
-  localStorage.setItem(libraryKey, JSON.stringify(books));
 }
-
 async function turn(delta) {
-  page += rtl ? -delta : delta;
+  if (!active) return;
+  const refs = await getBookRefs(active);
+  const nextPage = Math.max(0, Math.min(refs.length - 1, page + (rtl ? -delta : delta)));
+  if (nextPage === page) return;
+  page = nextPage;
   await showPage();
 }
+$('#closeReader').onclick = () => {
+  $('#reader').classList.remove('show','controls-hidden');
+  if (readerControlsTimer) clearTimeout(readerControlsTimer);
+  if (document.fullscreenElement) document.exitFullscreen?.().catch(()=>{});
+  if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
+  currentObjectUrl = null;
+  $('#pageImage').removeAttribute('src');
+  render();
+};
+$('#prev').onclick = () => turn(-1);
+$('#next').onclick = () => turn(1);
+$('#tapPrev').onclick = () => turn(rtl ? 1 : -1);
+$('#tapNext').onclick = () => turn(rtl ? -1 : 1);
+$('#directionBtn').onclick = () => {
+  rtl = !rtl;
+  $('#directionBtn').textContent = rtl ? 'RTL' : 'LTR';
+  $('#directionBtn').title = rtl ? 'Lectura derecha a izquierda' : 'Lectura izquierda a derecha';
+  revealReaderControls();
+};
+$('#fitBtn').onclick = () => {
+  setFitMode(fitMode === 'contain' ? 'width' : fitMode === 'width' ? 'height' : 'contain');
+  revealReaderControls();
+};
+$('#fullscreenBtn').onclick = async () => {
+  try {
+    if (!document.fullscreenElement) await $('#reader').requestFullscreen?.();
+    else await document.exitFullscreen?.();
+  } catch (error) { console.warn('Pantalla completa no disponible', error); }
+  revealReaderControls();
+};
+$('#pageSeek').addEventListener('input', async event => {
+  if (!active) return;
+  page = Number(event.target.value) - 1;
+  await showPage();
+  revealReaderControls();
+});
+let startX = 0, startY = 0;
+$('#pageArea').addEventListener('touchstart', event => {
+  startX = event.changedTouches[0].clientX;
+  startY = event.changedTouches[0].clientY;
+}, { passive: true });
+$('#pageArea').addEventListener('touchend', event => {
+  const dx = event.changedTouches[0].clientX - startX;
+  const dy = event.changedTouches[0].clientY - startY;
+  if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.2) turn((dx < 0 ? 1 : -1) * (rtl ? -1 : 1));
+}, { passive: true });
+document.addEventListener('keydown', event => {
+  if (!$('#reader').classList.contains('show')) return;
+  if (event.key === 'ArrowRight') { event.preventDefault(); turn(rtl ? -1 : 1); }
+  if (event.key === 'ArrowLeft') { event.preventDefault(); turn(rtl ? 1 : -1); }
+  if (event.key === 'Escape') $('#closeReader').click();
+  if (event.key === ' ') { event.preventDefault(); $('#reader').classList.toggle('controls-hidden'); if (!$('#reader').classList.contains('controls-hidden')) revealReaderControls(); }
+});
 
 $('#addBtn').onclick = $('#importBtn').onclick = () => $('#fileInput').click();
 $('#fileInput').onchange = event => {
