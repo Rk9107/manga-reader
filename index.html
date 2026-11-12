@@ -318,6 +318,9 @@ function stopReadingSession(){
   if(readingSessionTimer){clearInterval(readingSessionTimer);readingSessionTimer=null;}
   lastTrackedPageToken='';
 }
+// Flush the active session before a reload, tab close, or app navigation.
+window.addEventListener('pagehide',stopReadingSession);
+window.addEventListener('beforeunload',stopReadingSession);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)flushReadingTime();else if($('#reader').classList.contains('show'))readingSessionStarted=Date.now();});
 function formatReadingTime(seconds){
   const mins=Math.floor(seconds/60),hours=Math.floor(mins/60);
