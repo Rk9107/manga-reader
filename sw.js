@@ -1,13 +1,14 @@
 /* Manga Reader — Service Worker
    Compatible con GitHub Pages en /manga-reader/
 */
-const CACHE_NAME = "manga-reader-shell-v5";
+const CACHE_NAME = "manga-reader-shell-v6";
 
 const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.json",
-  "./icon.svg"
+  "./icon.svg",
+  "./worker-bundle.js"
 ];
 
 self.addEventListener("install", (event) => {
