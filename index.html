@@ -15,6 +15,7 @@
 <script type="module">
 const $ = (s) => document.querySelector(s);
 let books = [], active = null, page = 0, rtl = true, currentObjectUrl = null;
+const coverObjectUrls = new Set();
 const libraryKey = 'manga-reader-library-v1';
 let dbPromise;
 
@@ -73,7 +74,41 @@ function natural(a, b) {
   return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
 }
 
+async function loadCover(book, image, placeholder) {
+  try {
+    const refs = await getBookRefs(book);
+    if (!refs.length) return;
+    let src;
+    if (refs[0].legacyData) {
+      src = refs[0].legacyData;
+    } else {
+      const blob = await idbGet('pageBlobs', refs[0].key);
+      if (!blob) return;
+      src = URL.createObjectURL(blob);
+      coverObjectUrls.add(src);
+    }
+    image.onload = () => {
+      image.classList.remove('hidden');
+      placeholder.classList.add('hidden');
+    };
+    image.onerror = () => {
+      image.classList.add('hidden');
+      placeholder.classList.remove('hidden');
+    };
+    image.src = src;
+    image.alt = `Portada de ${book.title}`;
+    if (image.complete && image.naturalWidth > 0) {
+      image.classList.remove('hidden');
+      placeholder.classList.add('hidden');
+    }
+  } catch (error) {
+    console.warn('No se pudo cargar la portada de', book.title, error);
+  }
+}
+
 function render() {
+  for (const url of coverObjectUrls) URL.revokeObjectURL(url);
+  coverObjectUrls.clear();
   const query = ($('#search').value || '').toLowerCase();
   const list = books.filter(book => book.title.toLowerCase().includes(query));
   $('#library').innerHTML = '';
@@ -85,13 +120,14 @@ function render() {
     card.className = 'card';
     const currentPage = Math.max(1, Math.min(book.last || 1, book.pages || 1));
     const percent = book.pages ? Math.round((currentPage / book.pages) * 100) : 0;
-    card.innerHTML = '<div class="cover">▤</div><div class="info"><strong></strong><small class="page-label"></small><div class="progressline"><i></i></div><small class="percent-label"></small></div>';
+    card.innerHTML = '<div class="cover"><span class="cover-placeholder">▤</span><img class="cover-image hidden" alt="" loading="lazy"></div><div class="info"><strong></strong><small class="page-label"></small><div class="progressline"><i></i></div><small class="percent-label"></small></div>';
     card.querySelector('strong').textContent = book.title;
     card.querySelector('.page-label').textContent = `Página ${currentPage} de ${book.pages || 0}`;
     card.querySelector('.progressline i').style.width = `${percent}%`;
     card.querySelector('.percent-label').textContent = `${percent}% leído`;
     card.onclick = () => openBook(book.id);
     $('#library').append(card);
+    loadCover(book, card.querySelector('.cover-image'), card.querySelector('.cover-placeholder'));
   }
 }
 
