@@ -799,16 +799,35 @@ $('#zoomInBtn').onclick=()=>changeZoom(.25);
 $('#zoomOutBtn').onclick=()=>changeZoom(-.25);
 $('#zoomResetBtn').onclick=()=>{resetZoom();$('#zoomResetBtn').textContent='100%';revealReaderControls();};
 
+let pinchGestureActive=false;
 $('#pageImage').addEventListener('touchstart',e=>{
-  if(e.touches.length===2){pinchStart=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);pinchScale=zoomScale;}
+  if(e.touches.length===2){
+    pinchGestureActive=true;
+    pinchStart=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+    pinchScale=zoomScale;
+  }
 },{passive:true});
 $('#pageImage').addEventListener('touchmove',e=>{
-  if(e.touches.length===2 && pinchStart){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);zoomScale=Math.max(1,Math.min(4,pinchScale*d/pinchStart));applyZoom();e.preventDefault();}
+  if(e.touches.length===2 && pinchStart){
+    const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+    zoomScale=Math.max(1,Math.min(4,pinchScale*d/pinchStart));
+    if(zoomScale===1){zoomX=0;zoomY=0;}
+    applyZoom();
+    e.preventDefault();
+  }
 },{passive:false});
 $('#pageImage').addEventListener('touchend',e=>{
-  if(e.touches.length<2)pinchStart=0;
-  if(e.changedTouches.length===1){const now=Date.now();if(now-previousTapAt<280){zoomScale=zoomScale>1.05?1:2.2;applyZoom();previousTapAt=0;}else previousTapAt=now;}
+  if(pinchGestureActive){
+    if(e.touches.length===0){pinchGestureActive=false;pinchStart=0;}
+    return;
+  }
+  if(e.touches.length===0 && e.changedTouches.length===1){
+    const now=Date.now();
+    if(now-previousTapAt<280){zoomScale=zoomScale>1.05?1:2.2;if(zoomScale===1){zoomX=0;zoomY=0;}applyZoom();previousTapAt=0;}
+    else previousTapAt=now;
+  }
 },{passive:true});
+$('#pageImage').addEventListener('touchcancel',()=>{pinchGestureActive=false;pinchStart=0;},{passive:true});
 $('#verticalPages').addEventListener('scroll',()=>{
   if(!readerVertical || !active)return;
   const host=$('#verticalPages'), items=[...host.children], marker=host.getBoundingClientRect().top+host.clientHeight*.28;
