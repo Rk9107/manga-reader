@@ -165,11 +165,24 @@ button.primary{background:#aaa9ad;color:#101012}
 .reader.bg-dark .pagearea,.reader.bg-dark .vertical-pages{background:#242428}
 .reader.bg-light .pagearea,.reader.bg-light .vertical-pages{background:#dedde0}
 .reader.bg-light .vertical-pages img{background:#dedde0}
+
+.activity-panel{margin:18px 0 22px;padding:18px 20px;border:1px solid #303034;border-radius:17px;background:linear-gradient(140deg,#19191c,#101012)}
+.activity-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}.activity-heading h2{margin:2px 0 0;font-size:21px}
+.activity-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.activity-metric{display:grid;gap:3px;padding:12px;border-radius:12px;background:#ffffff08;border:1px solid #ffffff0c}
+.activity-metric b{font-size:22px;color:#f0eff1;font-variant-numeric:tabular-nums}.activity-metric span{font-size:12px;color:#aaa9ad}
+.activity-week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;align-items:end;height:94px;margin-top:17px}
+.activity-day{height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px;min-width:0}
+.activity-day i{display:block;width:min(100%,28px);min-height:3px;border-radius:5px 5px 2px 2px;background:#aaa9ad}
+.activity-day span{font-size:10px;color:#929196}
+.activity-note{margin:12px 0 0;color:#929196;font-size:12px}
+@media(max-width:560px){.activity-panel{padding:14px}.activity-heading{align-items:flex-start;flex-direction:column}.activity-metrics{gap:7px}.activity-metric{padding:9px}.activity-metric b{font-size:18px}.activity-metric span{font-size:11px}.activity-week{gap:5px}}
 </style></head>
 <body>
 <aside class="sidebar"><div class="sidebar-brand"><img src="icon.svg" alt=""><div><strong>TORII</strong><small>La puerta a otros mundos</small></div></div><nav class="side-nav" aria-label="Navegación principal"><a href="#library" data-view="library" class="active"><span>▦</span> Biblioteca</a><a href="#shelfBar" data-view="shelves"><span>▤</span> Estantes</a><a href="#library" data-view="series"><span>▧</span> Series</a><a href="#library" data-view="reading"><span>◷</span> Lecturas</a><a href="#backup" data-view="downloads"><span>↓</span> Respaldos</a><a href="#settings" data-view="settings"><span>⚙</span> Ajustes</a></nav><div class="side-note">Un espacio personal para explorar historias.<br><span style="color:#eee">静かに読もう · Lee a tu ritmo.</span></div></aside><header class="top"><div class="brand"><img src="icon.svg" alt=""><span>TORII</span></div><div class="spacer"></div><input id="fileInput" class="file-picker-native" type="file" aria-label="Añadir tomo" accept=".cbr,.rar,.cbz,.zip,.jpg,.jpeg,.png,.webp,.gif,.bmp,image/*" multiple></header>
 <main class="wrap"><section class="hero"><div class="hero-content"><div class="hero-kicker">TORII · TU BIBLIOTECA PERSONAL</div><h1>Tu colección, en su lugar.</h1><div class="muted">Una estantería personal para tus mangas, cómics e historias favoritas.</div><div class="actions"><input id="fileInputHero" class="file-picker-native" type="file" aria-label="Añadir tomos" accept=".cbr,.rar,.cbz,.zip,.jpg,.jpeg,.png,.webp,.gif,.bmp,image/*" multiple><button id="createShelfBtn">＋ Crear estante</button><button id="installBtn" class="hidden">Instalar aplicación</button></div><div class="tools"><button id="exportBtn">↓ Respaldar biblioteca</button><button id="backupInputBtn">↑ Restaurar respaldo</button><input id="backupInput" type="file" accept="application/json,.json" class="hidden"></div><div class="notice">Los mangas se procesan en tu navegador. No subas tus archivos CBR/CBZ a GitHub: este sitio solo contiene el lector.</div></div></section>
 <section id="continuePanel" class="continue-panel hidden"><div class="continue-copy"><div class="hero-kicker">TU ÚLTIMA LECTURA</div><h2 id="continueTitle">Continuar leyendo</h2><p id="continueDetail" class="muted"></p><div class="progressline"><i id="continueProgress"></i></div><button id="continueBtn" class="primary">▶ Continuar leyendo</button></div><div class="continue-cover" id="continueCover">読</div></section>
+<section id="activityPanel" class="activity-panel"><div class="activity-heading"><div><div class="hero-kicker">TORII · TU RECORRIDO</div><h2>Mi actividad</h2></div><span class="muted">Guardado en este dispositivo</span></div><div class="activity-metrics"><div class="activity-metric"><b id="activityPages">0</b><span>Páginas leídas</span></div><div class="activity-metric"><b id="activityTime">0 min</b><span>Tiempo de lectura</span></div><div class="activity-metric"><b id="activityDays">0</b><span>Días activos</span></div></div><div class="activity-week" id="activityWeek" aria-label="Actividad de los últimos siete días"></div><p class="activity-note" id="activityNote">Tus estadísticas aparecerán conforme leas.</p></section>
 <div class="stats"><div class="stat"><b id="totalStat">0</b> tomos</div><div class="stat"><b id="seriesStat">0</b> series</div><div class="stat"><b id="readingStat">0</b> leyendo</div><div class="stat"><b id="doneStat">0</b> series terminadas</div></div><div class="shelfbar" id="shelfBar"></div><div class="collectionhead"><button id="backToShelves" class="hidden">← Estantes</button><div><strong id="collectionHeading">Mis estantes</strong><div class="muted" id="collectionSub">Tus series organizadas como una biblioteca.</div></div><div class="spacer"></div><button id="deleteSeriesBtn" class="hidden" style="border-color:#8d4545;color:#ff9b9b">Eliminar manga</button></div><div class="toolbar"><input id="search" placeholder="Buscar en tu biblioteca…"><select id="statusFilter"><option value="all">Todos los estados</option><option value="reading">Leyendo</option><option value="planned">Pendientes</option><option value="completed">Terminados</option></select><select id="genreFilter"><option value="all">Todos los géneros</option></select><span class="muted" id="count">0 mangas</span></div><section id="library" class="grid"></section><section id="empty" class="empty"><div style="font-size:38px;margin-bottom:10px">▤</div><strong>Tu estantería está esperando nuevas historias</strong><p>Importa tus tomos y organízalos por serie y estante.</p></section></main>
 <section class="modal" id="editModal"><div class="dialog"><h2>Detalles del manga</h2><form id="editForm"><label class="field">Título<input id="metaTitle" maxlength="120" required></label><label class="field">Serie / colección<input id="metaSeries" maxlength="120" placeholder="Ej. GANTZ"></label><label class="field">Estante<input id="metaShelf" maxlength="80" placeholder="Ej. Horror"></label><label class="field">Autor<input id="metaAuthor" maxlength="100" placeholder="Autor o autora"></label><label class="field">Género<input id="metaGenre" maxlength="60" placeholder="Ej. horror, ciencia ficción"></label><label class="field">Estado<select id="metaStatus"><option value="reading">Leyendo</option><option value="planned">Pendiente</option><option value="completed">Terminado</option></select></label><label class="field">Notas<textarea id="metaNotes" maxlength="500" placeholder="Notas personales…"></textarea></label><label class="field">Sinopsis<textarea id="metaSynopsis" maxlength="1500" placeholder="De qué trata este manga…"></textarea></label><label><input id="metaFavorite" type="checkbox"> ★ Favorito</label><div class="dialogactions"><button type="button" id="cancelEdit">Cancelar</button><button class="primary" type="submit">Guardar</button></div></form></div></section><section class="reader fit-contain" id="reader" aria-label="Lector de manga">
   <div class="readbar" id="readerBar">
@@ -270,6 +283,55 @@ async function idbDelete(storeName, key) {
 function saveLibrary() {
   localStorage.setItem(libraryKey, JSON.stringify(books));
   render();
+}
+const readingStatsKey='torii-reading-stats-v1';
+let readingStats={pagesRead:0,totalSeconds:0,visited:{},dailyPages:{},dailySeconds:{},activeDays:{}};
+try{readingStats={...readingStats,...JSON.parse(localStorage.getItem(readingStatsKey)||'{}')};}catch{}
+readingStats.visited=readingStats.visited||{};readingStats.dailyPages=readingStats.dailyPages||{};readingStats.dailySeconds=readingStats.dailySeconds||{};readingStats.activeDays=readingStats.activeDays||{};
+let readingSessionStarted=0,readingSessionTimer=null,lastTrackedPageToken='';
+function localDayKey(date=new Date()){return [date.getFullYear(),String(date.getMonth()+1).padStart(2,'0'),String(date.getDate()).padStart(2,'0')].join('-');}
+function saveReadingStats(){localStorage.setItem(readingStatsKey,JSON.stringify(readingStats));renderActivity();}
+function recordPageRead(book,pageIndex){
+  if(!book)return;
+  const token=String(book.id)+':'+pageIndex;
+  if(token===lastTrackedPageToken)return;
+  lastTrackedPageToken=token;
+  const day=localDayKey(),key=String(book.id);
+  const seen=readingStats.visited[key]||(readingStats.visited[key]=[]);
+  if(!seen.includes(pageIndex)){seen.push(pageIndex);readingStats.pagesRead++;}
+  readingStats.dailyPages[day]=(readingStats.dailyPages[day]||0)+1;
+  readingStats.activeDays[day]=true;
+  saveReadingStats();
+}
+function flushReadingTime(){
+  if(!readingSessionStarted)return;
+  const now=Date.now(),seconds=Math.max(0,Math.floor((now-readingSessionStarted)/1000));
+  if(seconds){const day=localDayKey();readingStats.totalSeconds+=seconds;readingStats.dailySeconds[day]=(readingStats.dailySeconds[day]||0)+seconds;readingStats.activeDays[day]=true;readingSessionStarted=now;saveReadingStats();}
+}
+function startReadingSession(){
+  flushReadingTime();readingSessionStarted=Date.now();
+  if(readingSessionTimer)clearInterval(readingSessionTimer);
+  readingSessionTimer=setInterval(()=>{if(!document.hidden&&$('#reader').classList.contains('show'))flushReadingTime();},15000);
+}
+function stopReadingSession(){
+  flushReadingTime();readingSessionStarted=0;
+  if(readingSessionTimer){clearInterval(readingSessionTimer);readingSessionTimer=null;}
+  lastTrackedPageToken='';
+}
+document.addEventListener('visibilitychange',()=>{if(document.hidden)flushReadingTime();else if($('#reader').classList.contains('show'))readingSessionStarted=Date.now();});
+function formatReadingTime(seconds){
+  const mins=Math.floor(seconds/60),hours=Math.floor(mins/60);
+  return hours?hours+' h '+(mins%60)+' min':mins+' min';
+}
+function renderActivity(){
+  const days=Array.from({length:7},(_,i)=>{const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-(6-i));return {key:localDayKey(d),label:['dom','lun','mar','mié','jue','vie','sáb'][d.getDay()]};});
+  const max=Math.max(1,...days.map(d=>readingStats.dailyPages[d.key]||0));
+  $('#activityPages').textContent=readingStats.pagesRead||0;
+  $('#activityTime').textContent=formatReadingTime(readingStats.totalSeconds||0);
+  $('#activityDays').textContent=Object.keys(readingStats.activeDays).filter(k=>readingStats.activeDays[k]).length;
+  $('#activityWeek').innerHTML='';
+  for(const d of days){const count=readingStats.dailyPages[d.key]||0;const item=document.createElement('div');item.className='activity-day';const bar=document.createElement('i');bar.style.height=Math.max(3,Math.round(count/max*58))+'px';bar.title=count+' páginas';const label=document.createElement('span');label.textContent=d.label;item.append(bar,label);$('#activityWeek').append(item);}
+  $('#activityNote').textContent='Últimos 7 días · '+days.reduce((n,d)=>n+(readingStats.dailyPages[d.key]||0),0)+' páginas leídas';
 }
 function markCompletedAtEnd(book,total,currentPage){
   if(!book || !total || currentPage < total-1 || book.status==='completed') return false;
@@ -887,7 +949,7 @@ $('#verticalPages').addEventListener('scroll',()=>{
   const host=$('#verticalPages'), items=[...host.children], marker=host.getBoundingClientRect().top+host.clientHeight*.28;
   let nearest=0, distance=Infinity;
   items.forEach((img,i)=>{const d=Math.abs(img.getBoundingClientRect().top-marker);if(d<distance){distance=d;nearest=i;}});
-  page=nearest;const total=items.length;updateReaderProgress(total);active.last=page+1;if(!markCompletedAtEnd(active,total,page))localStorage.setItem(libraryKey,JSON.stringify(books));updateThumbnailSelection();
+  page=nearest;const total=items.length;updateReaderProgress(total);active.last=page+1;recordPageRead(active,page);if(!markCompletedAtEnd(active,total,page))localStorage.setItem(libraryKey,JSON.stringify(books));updateThumbnailSelection();
 },{passive:true});
 
 let readerControlsTimer = null;
@@ -917,7 +979,8 @@ function applyReaderAppearance(){
 $('#readerBgBtn').onclick=()=>{
   readerBg=readerBgModes[(readerBgModes.indexOf(readerBg)+1)%readerBgModes.length];
   localStorage.setItem('torii-reader-bg',readerBg);
-  applyReaderAppearance();revealReaderControls();
+  applyReaderAppearance();
+renderActivity();revealReaderControls();
 };
 $('#readerBrightness').addEventListener('input',e=>{
   readerBrightness=Number(e.target.value);
@@ -965,6 +1028,7 @@ async function openBook(id) {
   page = Math.max(0, Math.min(refs.length - 1, (active.last || 1) - 1));
   active.lastOpened=Date.now();
   saveLibrary();
+  startReadingSession();
   $('#readerTitle').textContent = active.title;
   $('#readerSubtitle').textContent = active.author ? active.author + ' · TORII' : 'Lectura inmersiva · TORII';
   $('#reader').classList.add('show');
@@ -1001,6 +1065,7 @@ async function showPage() {
     }
     updateReaderProgress(refs.length);
     active.last = page + 1;
+    recordPageRead(active,page);
     if(!markCompletedAtEnd(active,refs.length,page)) localStorage.setItem(libraryKey, JSON.stringify(books));
     updateThumbnailSelection();
   } catch (error) {
@@ -1018,6 +1083,7 @@ async function turn(delta) {
   await showPage();
 }
 $('#closeReader').onclick = () => {
+  stopReadingSession();
   $('#reader').classList.remove('show','controls-hidden');
   if (readerControlsTimer) clearTimeout(readerControlsTimer);
   if (document.fullscreenElement) document.exitFullscreen?.().catch(()=>{});
