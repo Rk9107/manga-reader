@@ -703,6 +703,28 @@ async function importPdf(file, bookId) {
   if (!pdf.numPages) throw new Error('El PDF no contiene páginas.');
   const refs = [];
   const maxDimension = 1600;
+
+  // Evita que Android apague la pantalla y suspenda una conversión larga.
+  let keepAwake = true;
+  let screenLock = null;
+  const acquireScreenLock = async () => {
+    if (!keepAwake || !('wakeLock' in navigator) || document.visibilityState !== 'visible' || screenLock) return;
+    try {
+      screenLock = await navigator.wakeLock.request('screen');
+      screenLock.addEventListener('release', () => {
+        screenLock = null;
+        if (keepAwake && document.visibilityState === 'visible') acquireScreenLock();
+      }, { once: true });
+    } catch (error) {
+      console.warn('[TORII] No se pudo mantener la pantalla activa:', error);
+    }
+  };
+  const onVisibilityChange = () => {
+    if (document.visibilityState === 'visible') acquireScreenLock();
+  };
+  document.addEventListener('visibilitychange', onVisibilityChange);
+  await acquireScreenLock();
+
   try {
     for (let i = 1; i <= pdf.numPages; i++) {
       setStatus(`Convirtiendo PDF: página ${i} de ${pdf.numPages}…`, Math.round(((i - 1) / pdf.numPages) * 100));
@@ -726,13 +748,20 @@ async function importPdf(file, bookId) {
       canvas.width = 0;
       canvas.height = 0;
       setStatus(`Guardando PDF: página ${i} de ${pdf.numPages}…`, Math.round((i / pdf.numPages) * 100));
+      // Cede el hilo entre páginas para que la interfaz y el navegador sigan respondiendo.
+      await new Promise(resolve => setTimeout(resolve, 0));
     }
   } finally {
+    keepAwake = false;
+    document.removeEventListener('visibilitychange', onVisibilityChange);
+    if (screenLock) {
+      try { await screenLock.release(); } catch (error) { console.warn('[TORII] No se pudo liberar la pantalla activa:', error); }
+      screenLock = null;
+    }
     await pdf.destroy();
   }
   return refs;
 }
-
 async function importZip(file, bookId) {
   setStatus(`Abriendo ZIP: ${file.name}…`, 0);
   if (!window.JSZip) {
