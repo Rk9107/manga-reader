@@ -568,33 +568,43 @@ async function getArchiveEngine() {
 
 async function importRar(file, bookId) {
   const Archive = await getArchiveEngine();
-  setStatus(`Leyendo índice de ${file.name}…`, 0);
+  setStatus(`Abriendo motor RAR para ${file.name}…`, 5);
   const archive = await Archive.open(file);
+
+  // libarchive.js documenta extractFiles() como el flujo completo de extracción.
+  // Después getFilesArray() devuelve entradas con objetos File ya extraídos.
+  setStatus(`Extrayendo contenido de ${file.name}…`, 12);
+  await archive.extractFiles();
   const entries = await archive.getFilesArray();
 
   const imageEntries = entries
     .filter(entry => {
       const name = entry.file?.name || entry.name || '';
-      const path = `${entry.path || ''}${name}`;
-      return imageName(path);
+      return imageName(`${entry.path || ''}${name}`);
     })
     .sort((a, b) => natural(
       `${a.path || ''}${a.file?.name || a.name || ''}`,
       `${b.path || ''}${b.file?.name || b.name || ''}`
     ));
 
-  if (!imageEntries.length) throw new Error('El CBR no contiene imágenes reconocibles.');
+  if (!imageEntries.length) {
+    throw new Error('El CBR se pudo abrir, pero no encontré páginas JPG, PNG o WebP. Comprueba que el archivo no esté protegido con contraseña.');
+  }
 
   const refs = [];
-  // Extrae una imagen a la vez. No crea una enorme cadena Base64
-  // ni conserva todas las páginas descomprimidas en memoria.
   for (let i = 0; i < imageEntries.length; i++) {
     const entry = imageEntries[i];
     const fileName = entry.file?.name || entry.name || `pagina-${i + 1}.jpg`;
-    const extracted = await entry.file.extract();
-    const blob = extracted instanceof Blob ? extracted : new Blob([extracted], { type: 'application/octet-stream' });
+    const extracted = entry.file;
+    if (!(extracted instanceof Blob) && !(extracted instanceof ArrayBuffer) && !ArrayBuffer.isView(extracted)) {
+      throw new Error(`No pude extraer la página ${fileName} del CBR.`);
+    }
+    const blob = extracted instanceof Blob
+      ? extracted
+      : new Blob([extracted], { type: 'application/octet-stream' });
+    if (!blob.size) throw new Error(`La página ${fileName} está vacía después de extraerla.`);
     refs.push(await saveImportedPage(bookId, `${entry.path || ''}${fileName}`, blob, i));
-    setStatus(`Extrayendo y guardando página ${i + 1} de ${imageEntries.length}…`, Math.round(((i + 1) / imageEntries.length) * 100));
+    setStatus(`Guardando página ${i + 1} de ${imageEntries.length}…`, 15 + Math.round(((i + 1) / imageEntries.length) * 80));
   }
   return refs;
 }
