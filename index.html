@@ -171,21 +171,20 @@ async function importZip(file, bookId) {
 }
 
 let archiveModulePromise;
-let archiveWorkerUrl;
 
 async function getArchiveEngine() {
   if (!archiveModulePromise) {
     archiveModulePromise = (async () => {
       setStatus('Preparando motor RAR…', 0);
-      const module = await import('https://esm.sh/libarchive.js@2.0.2?bundle');
 
-      // Descarga el worker y lo sirve desde una URL Blob del mismo sitio
-      // para evitar el bloqueo de workers de otro origen.
-      const workerAddress = 'https://cdn.jsdelivr.net/npm/libarchive.js@2.0.2/dist/worker-bundle.js';
-      const response = await fetch(workerAddress, { cache: 'force-cache' });
-      if (!response.ok) throw new Error(`No se pudo descargar el motor RAR (HTTP ${response.status}).`);
-      archiveWorkerUrl = URL.createObjectURL(await response.blob());
-      module.Archive.init({ workerUrl: archiveWorkerUrl });
+      // La interfaz ESM se carga desde jsDelivr, pero el Worker se sirve
+      // desde GitHub Pages en el mismo origen que esta aplicación.
+      const module = await import('https://cdn.jsdelivr.net/npm/libarchive.js@2.0.2/dist/libarchive.js');
+      const workerUrl = new URL('./worker-bundle.js', document.baseURI).href;
+
+      // El Worker local resuelve su WASM usando import.meta.url.
+      // En worker-bundle.js se fijó el WASM al CDN oficial de jsDelivr.
+      module.Archive.init({ workerUrl });
       return module.Archive;
     })().catch(error => {
       archiveModulePromise = null;
