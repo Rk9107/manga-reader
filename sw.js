@@ -1,7 +1,7 @@
 /* Manga Reader — Service Worker
    Compatible con GitHub Pages en /manga-reader/
 */
-const CACHE_NAME = "manga-reader-shell-v7";
+const CACHE_NAME = "manga-reader-shell-v8";
 
 const APP_SHELL = [
   "./",
