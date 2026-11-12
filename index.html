@@ -453,7 +453,7 @@ async function removeBook(bookId) {
       $('#reader').classList.remove('show');
       active = null;
       if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
-  clearThumbnailUrls(); verticalUrls.forEach(URL.revokeObjectURL); verticalUrls=[]; $('#thumbnailTray').classList.add('hidden'); $('#verticalPages').replaceChildren();
+
       currentObjectUrl = null;
     }
     saveLibrary();
@@ -905,6 +905,7 @@ $('#closeReader').onclick = () => {
   if (readerControlsTimer) clearTimeout(readerControlsTimer);
   if (document.fullscreenElement) document.exitFullscreen?.().catch(()=>{});
   if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
+  clearThumbnailUrls(); verticalUrls.forEach(URL.revokeObjectURL); verticalUrls=[]; $('#thumbnailTray').classList.add('hidden'); $('#verticalPages').replaceChildren(); $('#verticalPages').dataset.bookId='';
   currentObjectUrl = null;
   $('#pageImage').removeAttribute('src');
   render();
