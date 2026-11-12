@@ -5,16 +5,16 @@
 <meta name="theme-color" content="#111114"><meta name="description" content="Biblioteca personal de manga y cómics">
 <link rel="manifest" href="manifest.json"><title>Manga Reader</title>
 <style>
-:root{color-scheme:dark;--bg:#111114;--panel:#1b1b21;--panel2:#24242c;--text:#f3f0eb;--muted:#aaa6b2;--gold:#d7b77b;--line:#34343d}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px system-ui,-apple-system,Segoe UI,sans-serif}button,input{font:inherit}button{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:11px 15px;border-radius:12px;cursor:pointer}button.primary{background:var(--gold);color:#17130c;border:0;font-weight:700}.top{position:sticky;top:0;z-index:5;background:#111114ed;backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:15px max(16px,env(safe-area-inset-left));display:flex;align-items:center;gap:12px}.brand{font-weight:800;letter-spacing:.3px;font-size:19px}.brand span{color:var(--gold)}.spacer{flex:1}.wrap{max-width:1100px;margin:auto;padding:22px 16px 80px}.hero{padding:22px;border:1px solid var(--line);border-radius:20px;background:linear-gradient(135deg,#25232a,#17171c);margin-bottom:22px}.hero h1{font-size:clamp(24px,5vw,36px);margin:0 0 8px}.muted{color:var(--muted)}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:18px 0}.toolbar input{flex:1;min-width:170px;background:var(--panel);border:1px solid var(--line);color:var(--text);padding:12px;border-radius:12px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:16px}.card{background:var(--panel);border:1px solid var(--line);border-radius:15px;overflow:hidden;cursor:pointer}.cover{aspect-ratio:3/4;background:#292832;display:grid;place-items:center;color:var(--gold);font-size:34px;overflow:hidden}.cover img{width:100%;height:100%;object-fit:cover}.info{padding:11px}.info strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.info small{color:var(--muted)}.empty{text-align:center;padding:55px 18px;border:1px dashed #484650;border-radius:18px;color:var(--muted)}.reader{position:fixed;inset:0;z-index:20;background:#050506;display:none;flex-direction:column}.reader.show{display:flex}.readbar{display:flex;align-items:center;gap:10px;padding:10px;background:#111114;border-bottom:1px solid #333}.readbar .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pagearea{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:auto;touch-action:pan-y pinch-zoom}.pagearea img{max-width:100%;max-height:100%;object-fit:contain;user-select:none}.readfoot{display:flex;align-items:center;justify-content:center;gap:12px;padding:10px;background:#111114}.readfoot button{min-width:48px}.progress{color:var(--muted);font-variant-numeric:tabular-nums}.notice{margin-top:12px;padding:12px;background:#24232a;border-radius:12px;color:var(--muted);font-size:13px}.progressline{height:6px;background:#383640;border-radius:99px;overflow:hidden;margin-top:9px}.progressline>i{display:block;height:100%;width:0;background:var(--gold);transition:width .15s}.statusrow{display:flex;justify-content:space-between;gap:12px;align-items:center}.hidden{display:none!important}#fileInput{display:none}@media(min-width:700px){.wrap{padding-top:30px}.grid{grid-template-columns:repeat(auto-fill,minmax(175px,1fr))}}
+:root{color-scheme:dark;--bg:#111114;--panel:#1b1b21;--panel2:#24242c;--text:#f3f0eb;--muted:#aaa6b2;--gold:#d7b77b;--line:#34343d}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px system-ui,-apple-system,Segoe UI,sans-serif}button,input{font:inherit}button{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:11px 15px;border-radius:12px;cursor:pointer}button.primary{background:var(--gold);color:#17130c;border:0;font-weight:700}.top{position:sticky;top:0;z-index:5;background:#111114ed;backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:15px max(16px,env(safe-area-inset-left));display:flex;align-items:center;gap:12px}.brand{font-weight:800;letter-spacing:.3px;font-size:19px}.brand span{color:var(--gold)}.spacer{flex:1}.wrap{max-width:1100px;margin:auto;padding:22px 16px 80px}.hero{padding:22px;border:1px solid var(--line);border-radius:20px;background:linear-gradient(135deg,#25232a,#17171c);margin-bottom:22px}.hero h1{font-size:clamp(24px,5vw,36px);margin:0 0 8px}.muted{color:var(--muted)}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:18px 0}.toolbar input{flex:1;min-width:170px;background:var(--panel);border:1px solid var(--line);color:var(--text);padding:12px;border-radius:12px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:16px}.card{background:var(--panel);border:1px solid var(--line);border-radius:15px;overflow:hidden;cursor:pointer}.cover{aspect-ratio:3/4;background:#292832;display:grid;place-items:center;color:var(--gold);font-size:34px;overflow:hidden}.cover img{width:100%;height:100%;object-fit:cover}.info{padding:11px}.info strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.info small{color:var(--muted)}.empty{text-align:center;padding:55px 18px;border:1px dashed #484650;border-radius:18px;color:var(--muted)}.reader{position:fixed;inset:0;z-index:20;background:#050506;display:none;flex-direction:column}.reader.show{display:flex}.readbar{display:flex;align-items:center;gap:10px;padding:10px;background:#111114;border-bottom:1px solid #333}.readbar .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pagearea{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:auto;touch-action:pan-y pinch-zoom}.pagearea img{max-width:100%;max-height:100%;object-fit:contain;user-select:none}.readfoot{display:flex;align-items:center;justify-content:center;gap:12px;padding:10px;background:#111114}.readfoot button{min-width:48px}.progress{color:var(--muted);font-variant-numeric:tabular-nums}.notice{margin-top:12px;padding:12px;background:#24232a;border-radius:12px;color:var(--muted);font-size:13px}.tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.tools button{font-size:13px;padding:9px 11px}.stats{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.stat{background:var(--panel);border:1px solid var(--line);padding:10px 13px;border-radius:12px;color:var(--muted);font-size:13px}.stat b{color:var(--gold);margin-right:5px}.toolbar select{background:var(--panel);border:1px solid var(--line);color:var(--text);padding:12px;border-radius:12px}.cardtools{display:flex;gap:6px;margin-top:9px}.cardtools button{padding:6px 8px;font-size:12px}.meta{font-size:12px;color:var(--muted);margin-top:5px}.modal{position:fixed;inset:0;background:#000b;z-index:40;display:none;align-items:center;justify-content:center;padding:16px}.modal.show{display:flex}.dialog{width:min(480px,100%);max-height:90vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px}.dialog h2{margin:0 0 14px}.field{display:grid;gap:6px;margin:11px 0}.field input,.field select,.field textarea{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--text);padding:11px;border-radius:10px}.field textarea{min-height:70px;resize:vertical}.dialogactions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}.progressline{height:6px;background:#383640;border-radius:99px;overflow:hidden;margin-top:9px}.progressline>i{display:block;height:100%;width:0;background:var(--gold);transition:width .15s}.statusrow{display:flex;justify-content:space-between;gap:12px;align-items:center}.hidden{display:none!important}#fileInput{display:none}@media(min-width:700px){.wrap{padding-top:30px}.grid{grid-template-columns:repeat(auto-fill,minmax(175px,1fr))}}
 </style></head>
 <body>
 <header class="top"><div class="brand">MANGA <span>READER</span></div><div class="spacer"></div><button id="addBtn" class="primary">＋ Añadir manga</button><input id="fileInput" type="file" accept=".cbr,.rar,.cbz,.zip,.jpg,.jpeg,.png,.webp,.gif,.bmp,image/*" multiple></header>
-<main class="wrap"><section class="hero"><h1>Tu biblioteca, a tu ritmo.</h1><div class="muted">Un espacio privado en tu dispositivo para leer y organizar tus mangas.</div><div class="actions"><button class="primary" id="importBtn">Importar archivos</button><button id="installBtn" class="hidden">Instalar aplicación</button></div><div class="notice">Los mangas se procesan en tu navegador. No subas tus archivos CBR/CBZ a GitHub: este sitio solo contiene el lector.</div></section>
-<div class="toolbar"><input id="search" placeholder="Buscar en tu biblioteca…"><span class="muted" id="count">0 mangas</span></div><section id="library" class="grid"></section><section id="empty" class="empty"><div style="font-size:38px;margin-bottom:10px">▤</div><strong>Tu biblioteca está esperando su primer manga</strong><p>Importa un CBR, CBZ o imágenes para comenzar.</p></section></main>
-<section class="reader" id="reader"><div class="readbar"><button id="closeReader">← Biblioteca</button><div class="name" id="readerTitle"></div><div class="spacer"></div><button id="directionBtn">←→</button></div><div class="pagearea" id="pageArea"><img id="pageImage" alt="Página del manga"></div><div class="readfoot"><button id="prev">‹</button><span class="progress" id="pageCount">0 / 0</span><button id="next">›</button></div></section>
+<main class="wrap"><section class="hero"><h1>Tu biblioteca, a tu ritmo.</h1><div class="muted">Un espacio privado en tu dispositivo para leer y organizar tus mangas.</div><div class="actions"><button class="primary" id="importBtn">Importar archivos</button><button id="installBtn" class="hidden">Instalar aplicación</button></div><div class="tools"><button id="exportBtn">↓ Respaldar biblioteca</button><button id="backupInputBtn">↑ Restaurar respaldo</button><input id="backupInput" type="file" accept="application/json,.json" class="hidden"></div><div class="notice">Los mangas se procesan en tu navegador. No subas tus archivos CBR/CBZ a GitHub: este sitio solo contiene el lector.</div></section>
+<div class="stats"><div class="stat"><b id="totalStat">0</b> en biblioteca</div><div class="stat"><b id="readingStat">0</b> leyendo</div><div class="stat"><b id="doneStat">0</b> terminados</div><div class="stat"><b id="pendingStat">0</b> pendientes</div></div><div class="toolbar"><input id="search" placeholder="Buscar en tu biblioteca…"><select id="statusFilter"><option value="all">Todos los estados</option><option value="reading">Leyendo</option><option value="planned">Pendientes</option><option value="completed">Terminados</option></select><select id="genreFilter"><option value="all">Todos los géneros</option></select><span class="muted" id="count">0 mangas</span></div><section id="library" class="grid"></section><section id="empty" class="empty"><div style="font-size:38px;margin-bottom:10px">▤</div><strong>Tu biblioteca está esperando su primer manga</strong><p>Importa un CBR, CBZ o imágenes para comenzar.</p></section></main>
+<section class="modal" id="editModal"><div class="dialog"><h2>Detalles del manga</h2><form id="editForm"><label class="field">Título<input id="metaTitle" maxlength="120" required></label><label class="field">Autor<input id="metaAuthor" maxlength="100" placeholder="Autor o autora"></label><label class="field">Género<input id="metaGenre" maxlength="60" placeholder="Ej. horror, ciencia ficción"></label><label class="field">Estado<select id="metaStatus"><option value="reading">Leyendo</option><option value="planned">Pendiente</option><option value="completed">Terminado</option></select></label><label class="field">Notas<textarea id="metaNotes" maxlength="500" placeholder="Notas personales…"></textarea></label><label><input id="metaFavorite" type="checkbox"> ★ Favorito</label><div class="dialogactions"><button type="button" id="cancelEdit">Cancelar</button><button class="primary" type="submit">Guardar</button></div></form></div></section><section class="reader" id="reader"><div class="readbar"><button id="closeReader">← Biblioteca</button><div class="name" id="readerTitle"></div><div class="spacer"></div><button id="directionBtn">←→</button></div><div class="pagearea" id="pageArea"><img id="pageImage" alt="Página del manga"></div><div class="readfoot"><button id="prev">‹</button><span class="progress" id="pageCount">0 / 0</span><button id="next">›</button></div></section>
 <script type="module">
 const $ = (s) => document.querySelector(s);
-let books = [], active = null, page = 0, rtl = true, currentObjectUrl = null;
+let books = [], active = null, page = 0, rtl = true, currentObjectUrl = null, editingBookId = null;
 const coverObjectUrls = new Set();
 const libraryKey = 'manga-reader-library-v1';
 let dbPromise;
@@ -126,7 +126,28 @@ function render() {
   for (const url of coverObjectUrls) URL.revokeObjectURL(url);
   coverObjectUrls.clear();
   const query = ($('#search').value || '').toLowerCase();
-  const list = books.filter(book => book.title.toLowerCase().includes(query));
+  const status = $('#statusFilter').value;
+  const genre = $('#genreFilter').value;
+  const list = books.filter(book =>
+    book.title.toLowerCase().includes(query) &&
+    (status === 'all' || (book.status || 'reading') === status) &&
+    (genre === 'all' || (book.genre || '') === genre)
+  );
+  const genres = [...new Set(books.map(book => (book.genre || '').trim()).filter(Boolean))].sort(natural);
+  const genreSelect = $('#genreFilter');
+  const selectedGenre = genreSelect.value;
+  genreSelect.innerHTML = '<option value="all">Todos los géneros</option>';
+  for (const item of genres) {
+    const option = document.createElement('option');
+    option.value = item;
+    option.textContent = item;
+    genreSelect.append(option);
+  }
+  genreSelect.value = genres.includes(selectedGenre) ? selectedGenre : 'all';
+  $('#totalStat').textContent = books.length;
+  $('#readingStat').textContent = books.filter(b => (b.status || 'reading') === 'reading').length;
+  $('#doneStat').textContent = books.filter(b => b.status === 'completed').length;
+  $('#pendingStat').textContent = books.filter(b => b.status === 'planned').length;
   $('#library').innerHTML = '';
   $('#count').textContent = `${list.length} ${list.length === 1 ? 'manga' : 'mangas'}`;
   $('#empty').classList.toggle('hidden', list.length > 0);
@@ -136,11 +157,16 @@ function render() {
     card.className = 'card';
     const currentPage = Math.max(1, Math.min(book.last || 1, book.pages || 1));
     const percent = book.pages ? Math.round((currentPage / book.pages) * 100) : 0;
-    card.innerHTML = '<div class="cover"><span class="cover-placeholder">▤</span><img class="cover-image hidden" alt="" loading="lazy"></div><div class="info"><strong></strong><small class="page-label"></small><div class="progressline"><i></i></div><small class="percent-label"></small></div>';
+    card.innerHTML = '<div class="cover"><span class="cover-placeholder">▤</span><img class="cover-image hidden" alt="" loading="lazy"></div><div class="info"><strong></strong><small class="page-label"></small><div class="progressline"><i></i></div><small class="percent-label"></small><div class="meta"></div><div class="cardtools"><button class="editMeta">Editar detalles</button><button class="favMeta">☆ Favorito</button></div></div>';
     card.querySelector('strong').textContent = book.title;
     card.querySelector('.page-label').textContent = `Página ${currentPage} de ${book.pages || 0}`;
     card.querySelector('.progressline i').style.width = `${percent}%`;
     card.querySelector('.percent-label').textContent = `${percent}% leído`;
+    card.querySelector('.meta').textContent = [book.author, book.genre, ({reading:'Leyendo',planned:'Pendiente',completed:'Terminado'})[book.status || 'reading']].filter(Boolean).join(' · ');
+    const fav = card.querySelector('.favMeta');
+    fav.textContent = book.favorite ? '★ Favorito' : '☆ Favorito';
+    fav.onclick = event => { event.stopPropagation(); book.favorite = !book.favorite; saveLibrary(); };
+    card.querySelector('.editMeta').onclick = event => { event.stopPropagation(); editBook(book.id); };
     card.onclick = () => openBook(book.id);
     $('#library').append(card);
     loadCover(book, card.querySelector('.cover-image'), card.querySelector('.cover-placeholder'));
@@ -304,6 +330,11 @@ async function importFiles(selected) {
         title: bookTitle(file.name),
         pages: refs.length,
         last: 1,
+        status: 'reading',
+        author: '',
+        genre: '',
+        notes: '',
+        favorite: false,
         created: Date.now()
       });
       saveLibrary();
@@ -395,6 +426,74 @@ $('#fileInput').onchange = event => {
   importFiles(selected);
 };
 $('#search').oninput = render;
+$('#statusFilter').onchange = render;
+$('#genreFilter').onchange = render;
+
+function editBook(id) {
+  const book = books.find(item => item.id === id);
+  if (!book) return;
+  editingBookId = id;
+  $('#metaTitle').value = book.title || '';
+  $('#metaAuthor').value = book.author || '';
+  $('#metaGenre').value = book.genre || '';
+  $('#metaStatus').value = book.status || 'reading';
+  $('#metaNotes').value = book.notes || '';
+  $('#metaFavorite').checked = !!book.favorite;
+  $('#editModal').classList.add('show');
+}
+function closeEditor() {
+  $('#editModal').classList.remove('show');
+  editingBookId = null;
+}
+$('#cancelEdit').onclick = closeEditor;
+$('#editModal').addEventListener('click', event => { if (event.target === $('#editModal')) closeEditor(); });
+$('#editForm').onsubmit = event => {
+  event.preventDefault();
+  const book = books.find(item => item.id === editingBookId);
+  if (!book) return closeEditor();
+  book.title = $('#metaTitle').value.trim();
+  book.author = $('#metaAuthor').value.trim();
+  book.genre = $('#metaGenre').value.trim();
+  book.status = $('#metaStatus').value;
+  book.notes = $('#metaNotes').value.trim();
+  book.favorite = $('#metaFavorite').checked;
+  saveLibrary();
+  closeEditor();
+};
+
+function downloadJson(data, filename) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+$('#exportBtn').onclick = () => {
+  const backup = {app:'Manga Reader',version:2,exportedAt:new Date().toISOString(),books};
+  downloadJson(backup, `manga-reader-respaldo-${new Date().toISOString().slice(0,10)}.json`);
+  alert('Respaldo creado. Guarda este archivo en un lugar seguro. Incluye títulos, datos y progreso; las páginas de los cómics permanecen en el almacenamiento local de este dispositivo.');
+};
+$('#backupInputBtn').onclick = () => $('#backupInput').click();
+$('#backupInput').onchange = async event => {
+  const file = event.target.files[0];
+  event.target.value = '';
+  if (!file) return;
+  try {
+    const data = JSON.parse(await file.text());
+    if (data.app !== 'Manga Reader' || !Array.isArray(data.books)) throw new Error('Este archivo no parece un respaldo de Manga Reader.');
+    const merged = new Map(books.map(book => [book.id, book]));
+    for (const incoming of data.books) {
+      if (!incoming.id || !incoming.title) continue;
+      const existing = merged.get(incoming.id);
+      merged.set(incoming.id, existing ? {...existing,...incoming} : incoming);
+    }
+    books = [...merged.values()];
+    saveLibrary();
+    alert('Respaldo restaurado. Se recuperaron los datos y el progreso. Si estás en otro dispositivo, tendrás que importar también los archivos CBR/CBZ originales.');
+  } catch (error) {
+    alert('No pude restaurar el respaldo: ' + (error.message || error));
+  }
+};
 $('#closeReader').onclick = () => {
   $('#reader').classList.remove('show');
   if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
