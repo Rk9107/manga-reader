@@ -24,7 +24,7 @@ button.primary{background:#aaa9ad;color:#101012}
 .sidebar-brand small{display:block;color:#aaa9ad;font-size:11px;letter-spacing:.02em;margin-top:3px}
 .side-nav{display:grid;gap:8px;padding-top:20px}
 .side-nav a{display:flex;align-items:center;gap:13px;padding:13px 14px;border-radius:13px;color:#d4d3d6;text-decoration:none;font-weight:600}
-.side-nav a:first-child{background:#aaa9ad;color:#111}
+.side-nav a.active{background:#aaa9ad;color:#111}.side-nav a:first-child:not(.active){background:transparent;color:#d4d3d6}
 .side-nav a span{width:22px;text-align:center;font-size:18px}
 .side-note{margin-top:auto;padding:15px;border:1px solid #29292d;border-radius:14px;color:#aaa9ad;font-size:12px;line-height:1.6}
 .hero{position:relative;overflow:hidden;min-height:190px;padding:28px 30px;border:1px solid #303034;border-radius:22px;background:radial-gradient(circle at 78% 30%,#55545a55 0 9%,transparent 10%),linear-gradient(110deg,#1a1a1d 0%,#111113 56%,#202024 100%);margin-bottom:20px;display:flex;align-items:center}
@@ -73,7 +73,7 @@ button.primary{background:#aaa9ad;color:#101012}
 @media(max-width:560px){.top{height:66px}.brand img{width:36px;height:36px}.brand{font-size:18px}.hero{padding:22px 18px;min-height:0}.hero:after{font-size:110px;right:2%}.actions button{flex:1}.tools button{flex:1}.stats{gap:8px}.stat{padding:11px}.stat b{font-size:19px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.toolbar{gap:8px}.toolbar input{min-width:100%;width:100%}.toolbar select{flex:1;min-width:0}.collectionhead strong{font-size:19px}}
 </style></head>
 <body>
-<aside class="sidebar"><div class="sidebar-brand"><img src="icon.svg" alt=""><div><strong>TORII</strong><small>La puerta a otros mundos</small></div></div><nav class="side-nav"><a href="#library"><span>▦</span> Biblioteca</a><a href="#shelfBar"><span>▤</span> Estantes</a><a href="#collectionHeading"><span>▧</span> Series</a><a href="#library"><span>◷</span> Lecturas</a><a href="#library"><span>↓</span> Descargas</a><a href="#library"><span>⚙</span> Ajustes</a></nav><div class="side-note">Un espacio personal para explorar historias.<br><span style="color:#eee">静かに読もう · Lee a tu ritmo.</span></div></aside><header class="top"><div class="brand"><img src="icon.svg" alt=""><span>TORII</span></div><div class="spacer"></div><button id="addBtn" class="primary">＋ Añadir tomo</button><input id="fileInput" type="file" accept=".cbr,.rar,.cbz,.zip,.jpg,.jpeg,.png,.webp,.gif,.bmp,image/*" multiple></header>
+<aside class="sidebar"><div class="sidebar-brand"><img src="icon.svg" alt=""><div><strong>TORII</strong><small>La puerta a otros mundos</small></div></div><nav class="side-nav" aria-label="Navegación principal"><a href="#library" data-view="library" class="active"><span>▦</span> Biblioteca</a><a href="#shelfBar" data-view="shelves"><span>▤</span> Estantes</a><a href="#library" data-view="series"><span>▧</span> Series</a><a href="#library" data-view="reading"><span>◷</span> Lecturas</a><a href="#backup" data-view="downloads"><span>↓</span> Respaldos</a><a href="#settings" data-view="settings"><span>⚙</span> Ajustes</a></nav><div class="side-note">Un espacio personal para explorar historias.<br><span style="color:#eee">静かに読もう · Lee a tu ritmo.</span></div></aside><header class="top"><div class="brand"><img src="icon.svg" alt=""><span>TORII</span></div><div class="spacer"></div><button id="addBtn" class="primary">＋ Añadir tomo</button><input id="fileInput" type="file" accept=".cbr,.rar,.cbz,.zip,.jpg,.jpeg,.png,.webp,.gif,.bmp,image/*" multiple></header>
 <main class="wrap"><section class="hero"><div class="hero-content"><div class="hero-kicker">TORII · TU BIBLIOTECA PERSONAL</div><h1>Tu colección, en su lugar.</h1><div class="muted">Una estantería personal para tus mangas, cómics e historias favoritas.</div><div class="actions"><button class="primary" id="importBtn">＋ Añadir tomos</button><button id="createShelfBtn">＋ Crear estante</button><button id="installBtn" class="hidden">Instalar aplicación</button></div><div class="tools"><button id="exportBtn">↓ Respaldar biblioteca</button><button id="backupInputBtn">↑ Restaurar respaldo</button><input id="backupInput" type="file" accept="application/json,.json" class="hidden"></div><div class="notice">Los mangas se procesan en tu navegador. No subas tus archivos CBR/CBZ a GitHub: este sitio solo contiene el lector.</div></div></section>
 <div class="stats"><div class="stat"><b id="totalStat">0</b> tomos</div><div class="stat"><b id="seriesStat">0</b> series</div><div class="stat"><b id="readingStat">0</b> leyendo</div><div class="stat"><b id="doneStat">0</b> terminados</div></div><div class="shelfbar" id="shelfBar"></div><div class="collectionhead"><button id="backToShelves" class="hidden">← Estantes</button><div><strong id="collectionHeading">Mis estantes</strong><div class="muted" id="collectionSub">Tus series organizadas como una biblioteca.</div></div><div class="spacer"></div><button id="deleteSeriesBtn" class="hidden" style="border-color:#8d4545;color:#ff9b9b">Eliminar manga</button></div><div class="toolbar"><input id="search" placeholder="Buscar en tu biblioteca…"><select id="statusFilter"><option value="all">Todos los estados</option><option value="reading">Leyendo</option><option value="planned">Pendientes</option><option value="completed">Terminados</option></select><select id="genreFilter"><option value="all">Todos los géneros</option></select><span class="muted" id="count">0 mangas</span></div><section id="library" class="grid"></section><section id="empty" class="empty"><div style="font-size:38px;margin-bottom:10px">▤</div><strong>Tu estantería está esperando nuevas historias</strong><p>Importa tus tomos y organízalos por serie y estante.</p></section></main>
 <section class="modal" id="editModal"><div class="dialog"><h2>Detalles del manga</h2><form id="editForm"><label class="field">Título<input id="metaTitle" maxlength="120" required></label><label class="field">Serie / colección<input id="metaSeries" maxlength="120" placeholder="Ej. GANTZ"></label><label class="field">Estante<input id="metaShelf" maxlength="80" placeholder="Ej. Horror"></label><label class="field">Autor<input id="metaAuthor" maxlength="100" placeholder="Autor o autora"></label><label class="field">Género<input id="metaGenre" maxlength="60" placeholder="Ej. horror, ciencia ficción"></label><label class="field">Estado<select id="metaStatus"><option value="reading">Leyendo</option><option value="planned">Pendiente</option><option value="completed">Terminado</option></select></label><label class="field">Notas<textarea id="metaNotes" maxlength="500" placeholder="Notas personales…"></textarea></label><label><input id="metaFavorite" type="checkbox"> ★ Favorito</label><div class="dialogactions"><button type="button" id="cancelEdit">Cancelar</button><button class="primary" type="submit">Guardar</button></div></form></div></section><section class="reader" id="reader"><div class="readbar"><button id="closeReader">← Biblioteca</button><div class="name" id="readerTitle"></div><div class="spacer"></div><button id="directionBtn">←→</button></div><div class="pagearea" id="pageArea"><img id="pageImage" alt="Página del manga"></div><div class="readfoot"><button id="prev">‹</button><span class="progress" id="pageCount">0 / 0</span><button id="next">›</button></div></section>
@@ -279,6 +279,52 @@ function render() {
   }
   $('#empty').classList.toggle('hidden', grid.children.length > 0);
 }
+
+function setActiveNav(view) {
+  document.querySelectorAll('.side-nav a').forEach(link => link.classList.toggle('active', link.dataset.view === view));
+}
+document.querySelectorAll('.side-nav a[data-view]').forEach(link => {
+  link.addEventListener('click', event => {
+    event.preventDefault();
+    const view = link.dataset.view;
+    activeSeries = null;
+    if (view === 'library') {
+      activeShelf = 'Todos';
+      $('#statusFilter').value = 'all';
+      $('#genreFilter').value = 'all';
+      $('#search').value = '';
+      render();
+      setActiveNav('library');
+      window.scrollTo({top:0,behavior:'smooth'});
+    } else if (view === 'shelves') {
+      render();
+      setActiveNav('shelves');
+      $('#shelfBar').scrollIntoView({behavior:'smooth',block:'center'});
+    } else if (view === 'series') {
+      activeShelf = 'Todos';
+      $('#statusFilter').value = 'all';
+      $('#genreFilter').value = 'all';
+      render();
+      setActiveNav('series');
+      $('#collectionHeading').scrollIntoView({behavior:'smooth',block:'center'});
+    } else if (view === 'reading') {
+      activeShelf = 'Todos';
+      $('#statusFilter').value = 'reading';
+      $('#genreFilter').value = 'all';
+      $('#search').value = '';
+      render();
+      setActiveNav('reading');
+      $('#collectionHeading').scrollIntoView({behavior:'smooth',block:'center'});
+    } else if (view === 'downloads') {
+      setActiveNav('downloads');
+      $('#exportBtn').click();
+    } else if (view === 'settings') {
+      setActiveNav('settings');
+      alert('TORII guarda tus mangas y tu progreso en este dispositivo. Desde aquí puedes crear respaldos o restaurarlos con los botones de la biblioteca. Recuerda conservar tus archivos CBR/CBZ originales.');
+    }
+  });
+});
+
 $('#backToShelves').onclick=()=>{activeSeries=null;render();};
 
 async function removeBook(bookId) {
