@@ -857,14 +857,21 @@ async function importRar(file, bookId) {
   setStatus(`Abriendo motor RAR para ${file.name}…`, 5);
   const archive = await Archive.open(file);
 
-  // La API real del Worker devuelve directamente las entradas de extractFiles().
-  // Cada entrada contiene path, type y fileData (Uint8Array); no existe getFilesArray().
+  // API pública de libarchive.js 2.0.2:
+  // extractFiles() extrae el archivo y getFilesArray() devuelve { file, path }.
   setStatus(`Extrayendo contenido de ${file.name}…`, 12);
-  const entries = await archive.extractFiles();
+  await archive.extractFiles();
+  const entries = await archive.getFilesArray();
 
   const imageEntries = entries
-    .filter(entry => entry && entry.type === 'FILE' && imageName(entry.path || ''))
-    .sort((a, b) => natural(a.path || '', b.path || ''));
+    .filter(entry => {
+      const fileName = entry?.file?.name || '';
+      return entry?.file && imageName(`${entry.path || ''}${fileName}`);
+    })
+    .sort((a, b) => natural(
+      `${a.path || ''}${a.file?.name || ''}`,
+      `${b.path || ''}${b.file?.name || ''}`
+    ));
 
   if (!imageEntries.length) {
     throw new Error('El CBR se abrió, pero no contiene páginas JPG, PNG o WebP reconocibles. Comprueba que no esté protegido con contraseña.');
@@ -873,16 +880,13 @@ async function importRar(file, bookId) {
   const refs = [];
   for (let i = 0; i < imageEntries.length; i++) {
     const entry = imageEntries[i];
-    const fileName = (entry.path || '').split('/').pop() || `pagina-${i + 1}.jpg`;
-    const extracted = entry.fileData;
-    if (!(extracted instanceof Blob) && !(extracted instanceof ArrayBuffer) && !ArrayBuffer.isView(extracted)) {
-      throw new Error(`El motor RAR no entregó los datos de la página ${fileName}.`);
-    }
+    const fileName = entry.file.name || `pagina-${i + 1}.jpg`;
+    const extracted = entry.file;
     const blob = extracted instanceof Blob
       ? extracted
       : new Blob([extracted], { type: 'application/octet-stream' });
     if (!blob.size) throw new Error(`La página ${fileName} está vacía después de extraerla.`);
-    refs.push(await saveImportedPage(bookId, entry.path || fileName, blob, i));
+    refs.push(await saveImportedPage(bookId, `${entry.path || ''}${fileName}`, blob, i));
     setStatus(`Guardando página ${i + 1} de ${imageEntries.length}…`, 15 + Math.round(((i + 1) / imageEntries.length) * 80));
   }
   return refs;
