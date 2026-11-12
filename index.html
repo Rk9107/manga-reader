@@ -824,9 +824,35 @@ document.addEventListener('keydown', event => {
   if (event.key === ' ') { event.preventDefault(); $('#reader').classList.toggle('controls-hidden'); if (!$('#reader').classList.contains('controls-hidden')) revealReaderControls(); }
 });
 
-function handleMangaFileSelection(event) { const selected = [...(event.target.files || [])]; event.target.value = ''; if (selected.length) importFiles(selected); }
+async function handleMangaFileSelection(event) {
+  const selected = Array.from(event.target.files || []);
+  const inputId = event.target.id || 'selector';
+  // Vaciar después de conservar los File, para permitir volver a elegir el mismo archivo.
+  event.target.value = '';
+  if (!selected.length) {
+    setStatus('El selector se cerró sin entregar ningún archivo a TORII.', null);
+    return;
+  }
+  const file = selected[0];
+  setStatus(`Archivo recibido: ${file.name} · ${(file.size / 1048576).toFixed(1)} MB. Preparando importación…`, 1);
+  console.info('[TORII] selección recibida', { inputId, name: file.name, size: file.size, type: file.type });
+  try {
+    await importFiles(selected);
+  } catch (error) {
+    console.error('[TORII] error inesperado al importar', error);
+    setStatus(`Error al importar: ${error?.message || String(error)}`, null);
+  }
+}
 $('#fileInput').addEventListener('change', handleMangaFileSelection);
 $('#fileInputHero').addEventListener('change', handleMangaFileSelection);
+window.addEventListener('error', event => {
+  console.error('[TORII] error de interfaz', event.error || event.message);
+  setStatus(`Error de TORII: ${event.message || 'revisa la consola'}`, null);
+});
+window.addEventListener('unhandledrejection', event => {
+  console.error('[TORII] promesa rechazada', event.reason);
+  setStatus(`Error de proceso: ${event.reason?.message || String(event.reason)}`, null);
+});
 $('#search').oninput = render;
 $('#statusFilter').onchange = render;
 $('#genreFilter').onchange = render;
