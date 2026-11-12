@@ -1200,7 +1200,33 @@ async function lookupAniListMetadata(){
     const response=await fetch('https://graphql.anilist.co',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({query,variables:{search:title}})});
     if(!response.ok)throw new Error('AniList no respondió ('+response.status+').');
     const data=await response.json(),results=data?.data?.Page?.media||[];
-    if(!results.length){status.textContent='No encontramos coincidencias. Puedes completar la ficha manualmente.';return;}
+    const clean=s=>String(s||'').replace(/<[^>]*>/g,' ').replace(/\\s+/g,' ').trim();
+    if(!results.length){
+      status.textContent='AniList no tiene esta obra. Buscando en el catálogo general de libros y cómics…';
+      const googleResponse=await fetch('https://www.googleapis.com/books/v1/volumes?q='+encodeURIComponent('intitle:'+title)+'&maxResults=10&orderBy=relevance');
+      if(!googleResponse.ok)throw new Error('AniList no encontró la obra y Google Books respondió ('+googleResponse.status+').');
+      const googleData=await googleResponse.json(),items=googleData.items||[];
+      if(!items.length){status.textContent='No encontramos la obra en AniList ni en Google Books. Puedes completar la ficha manualmente.';return;}
+      const norm=s=>clean(s).toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
+      const target=norm(title);
+      const candidates=items.map(item=>{const v=item.volumeInfo||{},name=[v.title,v.subtitle].filter(Boolean).join(' '),n=norm(name),words=target.split(' ').filter(w=>w.length>2);const score=n===target?100:n.includes(target)||target.includes(n)?85:words.filter(w=>n.includes(w)).length/Math.max(1,words.length)*75;return {...item,_score:score,_name:name};}).sort((a,b)=>b._score-a._score);
+      let chosen=candidates[0];
+      if(candidates.length>1&&(chosen._score<85||candidates[1]._score===chosen._score)){
+        const options=candidates.slice(0,5).map((item,i)=>(i+1)+'. '+item._name+' — '+((item.volumeInfo||{}).authors||[]).join(', ')).join('\\n');
+        const answer=prompt('Google Books encontró estas posibles coincidencias. Escribe el número correcto:\\n\\n'+options);
+        const index=Number(answer)-1;if(!Number.isInteger(index)||index<0||index>=Math.min(5,candidates.length)){status.textContent='No se aplicaron cambios. Puedes volver a buscar.';return;}chosen=candidates[index];
+      }else if(chosen._score<45&&!confirm('La coincidencia es aproximada: '+chosen._name+'. ¿Quieres usarla?')){status.textContent='No se aplicaron cambios.';return;}
+      const v=chosen.volumeInfo||{};
+      book.author=(v.authors||[]).join(', ')||book.author||'';
+      book.genre=(v.categories||[]).join(', ')||book.genre||'';
+      book.synopsis=clean(v.description||'')||book.synopsis||'';
+      book.year=(v.publishedDate||'').slice(0,4)||book.year||'';
+      book.metadataCover=v.imageLinks?.thumbnail||v.imageLinks?.smallThumbnail||book.metadataCover||'';
+      book.metadataSource='Google Books';book.metadataId=chosen.id;
+      $('#metaAuthor').value=book.author;$('#metaGenre').value=book.genre;$('#metaSynopsis').value=book.synopsis;$('#metaYear').value=book.year;$('#metaPublication').value=book.publicationStatus||'';$('#metaCover').value=book.metadataCover;
+      status.textContent='Ficha encontrada en Google Books. Revisa los datos antes de guardar.';
+      return;
+    }
     const clean=s=>String(s||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
     const scored=results.map(item=>{const names=[item.title?.romaji,item.title?.english,item.title?.native].filter(Boolean);const norm=s=>clean(s).toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim();const target=norm(title);const score=names.some(n=>norm(n)===target)?100:names.some(n=>norm(n).includes(target)||target.includes(norm(n)))?85:0;return {...item,_score:score,_names:names};}).sort((a,b)=>b._score-a._score);
     let selected=scored[0];
@@ -1243,7 +1269,7 @@ function editBook(id) {
   $('#metaYear').value = book.year || '';
   $('#metaPublication').value = book.publicationStatus || '';
   $('#metaCover').value = book.metadataCover || '';
-  $('#metadataLookupStatus').textContent = book.metadataSource ? 'Ficha consultada en AniList' : 'Se enviará únicamente el título a AniList.';
+  $('#metadataLookupStatus').textContent = book.metadataSource ? 'Ficha consultada en '+book.metadataSource : 'Se enviará únicamente el título a AniList y, si no aparece, a Google Books.';
   $('#metaFavorite').checked = !!book.favorite;
   $('#editModal').classList.add('show');
 }
