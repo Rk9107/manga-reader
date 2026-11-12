@@ -344,8 +344,7 @@ function render() {
     $('#continueDetail').textContent='Página '+current+' de '+total+' · '+Math.round(current/total*100)+'% leído';
     $('#continueProgress').style.width=Math.round(current/total*100)+'%';
     $('#continueBtn').onclick=()=>openBook(lastRead.id);
-    const cover=$('#continueCover');cover.textContent='読';
-    loadCover(lastRead,(()=>{const img=document.createElement('img');img.alt='';img.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:8px';cover.replaceChildren(img);return img;})(),null);
+    const cover=$('#continueCover');cover.replaceChildren();const placeholder=document.createElement('span');placeholder.textContent='読';const image=document.createElement('img');image.className='hidden';image.alt='';image.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:8px';cover.append(placeholder,image);loadCover(lastRead,image,placeholder);
   }
   const allSeries = new Set(books.map(book => book.series || inferSeries(book.title)));
   $('#totalStat').textContent = books.length;
