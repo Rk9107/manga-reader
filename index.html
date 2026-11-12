@@ -857,39 +857,32 @@ async function importRar(file, bookId) {
   setStatus(`Abriendo motor RAR para ${file.name}…`, 5);
   const archive = await Archive.open(file);
 
-  // libarchive.js documenta extractFiles() como el flujo completo de extracción.
-  // Después getFilesArray() devuelve entradas con objetos File ya extraídos.
+  // La API real del Worker devuelve directamente las entradas de extractFiles().
+  // Cada entrada contiene path, type y fileData (Uint8Array); no existe getFilesArray().
   setStatus(`Extrayendo contenido de ${file.name}…`, 12);
-  await archive.extractFiles();
-  const entries = await archive.getFilesArray();
+  const entries = await archive.extractFiles();
 
   const imageEntries = entries
-    .filter(entry => {
-      const name = entry.file?.name || entry.name || '';
-      return imageName(`${entry.path || ''}${name}`);
-    })
-    .sort((a, b) => natural(
-      `${a.path || ''}${a.file?.name || a.name || ''}`,
-      `${b.path || ''}${b.file?.name || b.name || ''}`
-    ));
+    .filter(entry => entry && entry.type === 'FILE' && imageName(entry.path || ''))
+    .sort((a, b) => natural(a.path || '', b.path || ''));
 
   if (!imageEntries.length) {
-    throw new Error('El CBR se pudo abrir, pero no encontré páginas JPG, PNG o WebP. Comprueba que el archivo no esté protegido con contraseña.');
+    throw new Error('El CBR se abrió, pero no contiene páginas JPG, PNG o WebP reconocibles. Comprueba que no esté protegido con contraseña.');
   }
 
   const refs = [];
   for (let i = 0; i < imageEntries.length; i++) {
     const entry = imageEntries[i];
-    const fileName = entry.file?.name || entry.name || `pagina-${i + 1}.jpg`;
-    const extracted = entry.file;
+    const fileName = (entry.path || '').split('/').pop() || `pagina-${i + 1}.jpg`;
+    const extracted = entry.fileData;
     if (!(extracted instanceof Blob) && !(extracted instanceof ArrayBuffer) && !ArrayBuffer.isView(extracted)) {
-      throw new Error(`No pude extraer la página ${fileName} del CBR.`);
+      throw new Error(`El motor RAR no entregó los datos de la página ${fileName}.`);
     }
     const blob = extracted instanceof Blob
       ? extracted
       : new Blob([extracted], { type: 'application/octet-stream' });
     if (!blob.size) throw new Error(`La página ${fileName} está vacía después de extraerla.`);
-    refs.push(await saveImportedPage(bookId, `${entry.path || ''}${fileName}`, blob, i));
+    refs.push(await saveImportedPage(bookId, entry.path || fileName, blob, i));
     setStatus(`Guardando página ${i + 1} de ${imageEntries.length}…`, 15 + Math.round(((i + 1) / imageEntries.length) * 80));
   }
   return refs;
