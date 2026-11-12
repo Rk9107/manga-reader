@@ -1,1 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#111114"/><path d="M110 112h292v288H110z" fill="#24242c" stroke="#d7b77b" stroke-width="18"/><path d="M256 112v288M145 170h82m-82 54h82m58-54h82m-82 54h82" stroke="#d7b77b" stroke-width="16" stroke-linecap="round"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<rect width="512" height="512" rx="112" fill="#aaa9ad"/>
+<g fill="#080808">
+<path d="M65 126 Q256 166 447 126 L421 169 Q256 193 91 169 Z"/>
+<path d="M106 169 L140 169 L140 193 L372 193 L372 169 L406 169 L395 215 L117 215 Z"/>
+<path d="M154 205 H190 V414 H154 Z M322 205 H358 V414 H322 Z"/>
+<path d="M105 234 H407 V258 H105 Z"/>
+<path d="M139 402 H205 V420 H139 Z M307 402 H373 V420 H307 Z"/>
+</g>
+<text x="256" y="350" text-anchor="middle" font-size="112" font-family="serif" font-weight="700" fill="#080808">読</text>
+</svg>
