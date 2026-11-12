@@ -280,17 +280,27 @@ async function idbDelete(storeName, key) {
   });
 }
 
+const readingStatsKey='torii-reading-stats-v1';
+const emptyReadingStats=()=>({pagesRead:0,totalSeconds:0,visited:{},dailyPages:{},dailySeconds:{},activeDays:{}});
+let readingStats=emptyReadingStats();
+try{
+  const embedded=books.find(book=>book._toriiReadingStats)?._toriiReadingStats;
+  const stored=JSON.parse(localStorage.getItem(readingStatsKey)||'null');
+  readingStats={...readingStats,...(embedded||{}),...(stored||{})};
+}catch{}
+readingStats.visited=readingStats.visited||{};readingStats.dailyPages=readingStats.dailyPages||{};readingStats.dailySeconds=readingStats.dailySeconds||{};readingStats.activeDays=readingStats.activeDays||{};
+function persistReadingStats(){
+  try{localStorage.setItem(readingStatsKey,JSON.stringify(readingStats));}catch{}
+  if(books.length){books[0]._toriiReadingStats=readingStats;localStorage.setItem(libraryKey,JSON.stringify(books));}
+}
 function saveLibrary() {
+  if(books.length)books[0]._toriiReadingStats=readingStats;
   localStorage.setItem(libraryKey, JSON.stringify(books));
   render();
 }
-const readingStatsKey='torii-reading-stats-v1';
-let readingStats={pagesRead:0,totalSeconds:0,visited:{},dailyPages:{},dailySeconds:{},activeDays:{}};
-try{readingStats={...readingStats,...JSON.parse(localStorage.getItem(readingStatsKey)||'{}')};}catch{}
-readingStats.visited=readingStats.visited||{};readingStats.dailyPages=readingStats.dailyPages||{};readingStats.dailySeconds=readingStats.dailySeconds||{};readingStats.activeDays=readingStats.activeDays||{};
 let readingSessionStarted=0,readingSessionTimer=null,lastTrackedPageToken='';
 function localDayKey(date=new Date()){return [date.getFullYear(),String(date.getMonth()+1).padStart(2,'0'),String(date.getDate()).padStart(2,'0')].join('-');}
-function saveReadingStats(){localStorage.setItem(readingStatsKey,JSON.stringify(readingStats));renderActivity();}
+function saveReadingStats(){persistReadingStats();renderActivity();}
 function recordPageRead(book,pageIndex){
   if(!book)return;
   const token=String(book.id)+':'+pageIndex;
