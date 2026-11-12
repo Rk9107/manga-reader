@@ -184,8 +184,8 @@ button.primary{background:#aaa9ad;color:#101012}
 @media(max-width:700px){.torii-whisper{margin-top:16px;padding-top:11px}.torii-whisper-jp{font-size:15px}}
 </style></head>
 <body>
-<aside class="sidebar"><div class="sidebar-brand"><img src="icon.svg" alt=""><div><strong>TORII</strong><small>La puerta a otros mundos</small></div></div><nav class="side-nav" aria-label="Navegación principal"><a href="#library" data-view="library" class="active"><span>▦</span> Biblioteca</a><a href="#shelfBar" data-view="shelves"><span>▤</span> Estantes</a><a href="#library" data-view="series"><span>▧</span> Series</a><a href="#library" data-view="reading"><span>◷</span> Lecturas</a><a href="#backup" data-view="downloads"><span>↓</span> Respaldos</a><a href="#settings" data-view="settings"><span>⚙</span> Ajustes</a></nav><div class="side-note">Un espacio personal para explorar historias.<br><span style="color:#eee">静かに読もう · Lee a tu ritmo.</span></div></aside><header class="top"><div class="brand"><img src="icon.svg" alt=""><span>TORII</span></div><div class="spacer"></div><input id="fileInput" class="file-picker-native" type="file" aria-label="Añadir tomo" accept=".cbr,.rar,.cbz,.zip,.jpg,.jpeg,.png,.webp,.gif,.bmp,image/*" multiple></header>
-<main class="wrap"><section class="hero"><div class="hero-content"><div class="hero-kicker">TORII · TU BIBLIOTECA PERSONAL</div><h1>Tu colección, en su lugar.</h1><div class="muted">Una estantería personal para tus mangas, cómics e historias favoritas.</div><div class="torii-whisper" id="toriiWhisper" aria-live="polite"><span class="torii-whisper-jp">自分のペースで</span><span class="torii-whisper-translation">A tu propio ritmo.</span></div><div class="actions"><input id="fileInputHero" class="file-picker-native" type="file" aria-label="Añadir tomos" accept=".cbr,.rar,.cbz,.zip,.jpg,.jpeg,.png,.webp,.gif,.bmp,image/*" multiple><button id="createShelfBtn">＋ Crear estante</button><button id="installBtn" class="hidden">Instalar aplicación</button></div><div class="tools"><button id="exportBtn">↓ Respaldar biblioteca</button><button id="backupInputBtn">↑ Restaurar respaldo</button><input id="backupInput" type="file" accept="application/json,.json" class="hidden"></div><div class="notice">Los mangas se procesan en tu navegador. No subas tus archivos CBR/CBZ a GitHub: este sitio solo contiene el lector.</div></div></section>
+<aside class="sidebar"><div class="sidebar-brand"><img src="icon.svg" alt=""><div><strong>TORII</strong><small>La puerta a otros mundos</small></div></div><nav class="side-nav" aria-label="Navegación principal"><a href="#library" data-view="library" class="active"><span>▦</span> Biblioteca</a><a href="#shelfBar" data-view="shelves"><span>▤</span> Estantes</a><a href="#library" data-view="series"><span>▧</span> Series</a><a href="#library" data-view="reading"><span>◷</span> Lecturas</a><a href="#backup" data-view="downloads"><span>↓</span> Respaldos</a><a href="#settings" data-view="settings"><span>⚙</span> Ajustes</a></nav><div class="side-note">Un espacio personal para explorar historias.<br><span style="color:#eee">静かに読もう · Lee a tu ritmo.</span></div></aside><header class="top"><div class="brand"><img src="icon.svg" alt=""><span>TORII</span></div><div class="spacer"></div><input id="fileInput" class="file-picker-native" type="file" aria-label="Añadir tomo" accept=".cbr,.rar,.cbz,.zip,.pdf,.jpg,.jpeg,.png,.webp,.gif,.bmp,application/pdf,image/*" multiple></header>
+<main class="wrap"><section class="hero"><div class="hero-content"><div class="hero-kicker">TORII · TU BIBLIOTECA PERSONAL</div><h1>Tu colección, en su lugar.</h1><div class="muted">Una estantería personal para tus mangas, cómics e historias favoritas.</div><div class="torii-whisper" id="toriiWhisper" aria-live="polite"><span class="torii-whisper-jp">自分のペースで</span><span class="torii-whisper-translation">A tu propio ritmo.</span></div><div class="actions"><input id="fileInputHero" class="file-picker-native" type="file" aria-label="Añadir tomos" accept=".cbr,.rar,.cbz,.zip,.pdf,.jpg,.jpeg,.png,.webp,.gif,.bmp,application/pdf,image/*" multiple><button id="createShelfBtn">＋ Crear estante</button><button id="installBtn" class="hidden">Instalar aplicación</button></div><div class="tools"><button id="exportBtn">↓ Respaldar biblioteca</button><button id="backupInputBtn">↑ Restaurar respaldo</button><input id="backupInput" type="file" accept="application/json,.json" class="hidden"></div><div class="notice">Los mangas se procesan en tu navegador. No subas tus archivos CBR/CBZ a GitHub: este sitio solo contiene el lector.</div></div></section>
 <section id="continuePanel" class="continue-panel hidden"><div class="continue-copy"><div class="hero-kicker">TU ÚLTIMA LECTURA</div><h2 id="continueTitle">Continuar leyendo</h2><p id="continueDetail" class="muted"></p><div class="progressline"><i id="continueProgress"></i></div><button id="continueBtn" class="primary">▶ Continuar leyendo</button></div><div class="continue-cover" id="continueCover">読</div></section>
 <section id="activityPanel" class="activity-panel"><div class="activity-heading"><div><div class="hero-kicker">TORII · TU RECORRIDO</div><h2>Mi actividad</h2></div><span class="muted">Guardado en este dispositivo</span></div><div class="activity-metrics"><div class="activity-metric"><b id="activityPages">0</b><span>Páginas leídas</span></div><div class="activity-metric"><b id="activityTime">0 min</b><span>Tiempo de lectura</span></div><div class="activity-metric"><b id="activityDays">0</b><span>Días activos</span></div></div><div class="activity-week" id="activityWeek" aria-label="Actividad de los últimos siete días"></div><p class="activity-note" id="activityNote">Tus estadísticas aparecerán conforme leas.</p></section>
 <div class="stats"><div class="stat"><b id="totalStat">0</b> tomos</div><div class="stat"><b id="seriesStat">0</b> series</div><div class="stat"><b id="readingStat">0</b> leyendo</div><div class="stat"><b id="doneStat">0</b> series terminadas</div></div><div class="shelfbar" id="shelfBar"></div><div class="collectionhead"><button id="backToShelves" class="hidden">← Estantes</button><div><strong id="collectionHeading">Mis estantes</strong><div class="muted" id="collectionSub">Tus series organizadas como una biblioteca.</div></div><div class="spacer"></div><button id="deleteSeriesBtn" class="hidden" style="border-color:#8d4545;color:#ff9b9b">Eliminar manga</button></div><div class="toolbar"><input id="search" placeholder="Buscar en tu biblioteca…"><select id="statusFilter"><option value="all">Todos los estados</option><option value="reading">Leyendo</option><option value="planned">Pendientes</option><option value="completed">Terminados</option></select><select id="genreFilter"><option value="all">Todos los géneros</option></select><span class="muted" id="count">0 mangas</span></div><section id="library" class="grid"></section><section id="empty" class="empty"><div style="font-size:38px;margin-bottom:10px">▤</div><strong>Tu estantería está esperando nuevas historias</strong><p>Importa tus tomos y organízalos por serie y estante.</p></section></main>
@@ -676,6 +676,63 @@ async function saveBookRefs(bookId, refs) {
   await idbPut('pages', refs, bookId);
 }
 
+let pdfEnginePromise;
+async function getPdfEngine() {
+  if (!pdfEnginePromise) {
+    pdfEnginePromise = new Promise((resolve, reject) => {
+      if (window.pdfjsLib) { resolve(window.pdfjsLib); return; }
+      const tag = document.createElement('script');
+      tag.src = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js';
+      tag.onload = () => {
+        if (!window.pdfjsLib) { reject(new Error('No se pudo inicializar PDF.js.')); return; }
+        resolve(window.pdfjsLib);
+      };
+      tag.onerror = () => reject(new Error('No se pudo cargar el motor PDF.'));
+      document.head.append(tag);
+    }).catch(error => { pdfEnginePromise = null; throw error; });
+  }
+  return pdfEnginePromise;
+}
+
+async function importPdf(file, bookId) {
+  setStatus(`Preparando PDF: ${file.name}…`, 0);
+  const pdfjs = await getPdfEngine();
+  pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+  const data = new Uint8Array(await file.arrayBuffer());
+  const pdf = await pdfjs.getDocument({ data }).promise;
+  if (!pdf.numPages) throw new Error('El PDF no contiene páginas.');
+  const refs = [];
+  const maxDimension = 1600;
+  try {
+    for (let i = 1; i <= pdf.numPages; i++) {
+      setStatus(`Convirtiendo PDF: página ${i} de ${pdf.numPages}…`, Math.round(((i - 1) / pdf.numPages) * 100));
+      const page = await pdf.getPage(i);
+      const base = page.getViewport({ scale: 1 });
+      const scale = Math.min(1.6, maxDimension / Math.max(base.width, base.height));
+      const viewport = page.getViewport({ scale });
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.ceil(viewport.width));
+      canvas.height = Math.max(1, Math.ceil(viewport.height));
+      const context = canvas.getContext('2d', { alpha: false });
+      if (!context) throw new Error('No se pudo preparar el lienzo para convertir el PDF.');
+      context.fillStyle = '#ffffff';
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      await page.render({ canvasContext: context, viewport }).promise;
+      const blob = await new Promise((resolve, reject) => {
+        canvas.toBlob(result => result ? resolve(result) : reject(new Error(`No se pudo convertir la página ${i} del PDF.`)), 'image/jpeg', 0.88);
+      });
+      refs.push(await saveImportedPage(bookId, `pagina-${String(i).padStart(4, '0')}.jpg`, blob, i - 1));
+      page.cleanup();
+      canvas.width = 0;
+      canvas.height = 0;
+      setStatus(`Guardando PDF: página ${i} de ${pdf.numPages}…`, Math.round((i / pdf.numPages) * 100));
+    }
+  } finally {
+    await pdf.destroy();
+  }
+  return refs;
+}
+
 async function importZip(file, bookId) {
   setStatus(`Abriendo ZIP: ${file.name}…`, 0);
   if (!window.JSZip) {
@@ -779,7 +836,10 @@ async function importFiles(selected) {
       let refs = [];
       // Algunos archivos .cbr son en realidad contenedores ZIP renombrados.
       // Detectar el formato por la firma binaria evita enviarlos al motor RAR.
-      const signature = new Uint8Array(await file.slice(0, 8).arrayBuffer());
+      // Detecta el contenido real para admitir PDF aunque venga renombrado como .cbr.
+      const signature = new Uint8Array(await file.slice(0, 1024).arrayBuffer());
+      const signatureText = new TextDecoder().decode(signature);
+      const isPdfContainer = signatureText.includes('%PDF-');
       const isZipContainer =
         signature[0] === 0x50 && signature[1] === 0x4B &&
         ([0x03, 0x05, 0x07].includes(signature[2])) &&
@@ -787,7 +847,9 @@ async function importFiles(selected) {
       const isRarContainer =
         signature[0] === 0x52 && signature[1] === 0x61 &&
         signature[2] === 0x72 && signature[3] === 0x21;
-      if (/\.(cbz|zip)$/i.test(file.name) || isZipContainer) {
+      if (isPdfContainer || /\.pdf$/i.test(file.name) || file.type === 'application/pdf') {
+        refs = await importPdf(file, bookId);
+      } else if (/\.(cbz|zip)$/i.test(file.name) || isZipContainer) {
         refs = await importZip(file, bookId);
       } else if (/\.(cbr|rar)$/i.test(file.name) && isRarContainer) {
         refs = await importRar(file, bookId);
