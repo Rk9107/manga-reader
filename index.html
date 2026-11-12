@@ -939,36 +939,6 @@ $('#backupInput').onchange = async event => {
     alert('No pude restaurar el respaldo: ' + (error.message || error));
   }
 };
-$('#closeReader').onclick = () => {
-  $('#reader').classList.remove('show','controls-hidden');
-  if (readerControlsTimer) clearTimeout(readerControlsTimer);
-  if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
-  currentObjectUrl = null;
-  render();
-};
-$('#prev').onclick = () => turn(-1);
-$('#next').onclick = () => turn(1);
-$('#directionBtn').onclick = () => {
-  rtl = !rtl;
-  $('#directionBtn').textContent = rtl ? 'Derecha a izquierda' : 'Izquierda a derecha';
-};
-
-let startX = 0;
-$('#pageArea').addEventListener('touchstart', event => {
-  startX = event.changedTouches[0].clientX;
-}, { passive: true });
-$('#pageArea').addEventListener('touchend', event => {
-  const dx = event.changedTouches[0].clientX - startX;
-  if (Math.abs(dx) > 45) turn((dx < 0 ? 1 : -1) * (rtl ? -1 : 1));
-}, { passive: true });
-
-document.addEventListener('keydown', event => {
-  if (!$('#reader').classList.contains('show')) return;
-  if (event.key === 'ArrowRight') turn(-1);
-  if (event.key === 'ArrowLeft') turn(1);
-  if (event.key === 'Escape') $('#closeReader').click();
-});
-
 let deferredInstall = null;
 window.addEventListener('beforeinstallprompt', event => {
   event.preventDefault();
