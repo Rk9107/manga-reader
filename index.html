@@ -83,9 +83,13 @@ function render() {
   for (const book of list) {
     const card = document.createElement('article');
     card.className = 'card';
-    card.innerHTML = '<div class="cover">▤</div><div class="info"><strong></strong><small></small></div>';
+    const currentPage = Math.max(1, Math.min(book.last || 1, book.pages || 1));
+    const percent = book.pages ? Math.round((currentPage / book.pages) * 100) : 0;
+    card.innerHTML = '<div class="cover">▤</div><div class="info"><strong></strong><small class="page-label"></small><div class="progressline"><i></i></div><small class="percent-label"></small></div>';
     card.querySelector('strong').textContent = book.title;
-    card.querySelector('small').textContent = `Página ${book.last || 1} de ${book.pages || 0}`;
+    card.querySelector('.page-label').textContent = `Página ${currentPage} de ${book.pages || 0}`;
+    card.querySelector('.progressline i').style.width = `${percent}%`;
+    card.querySelector('.percent-label').textContent = `${percent}% leído`;
     card.onclick = () => openBook(book.id);
     $('#library').append(card);
   }
@@ -343,6 +347,7 @@ $('#closeReader').onclick = () => {
   $('#reader').classList.remove('show');
   if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
   currentObjectUrl = null;
+  render();
 };
 $('#prev').onclick = () => turn(-1);
 $('#next').onclick = () => turn(1);
