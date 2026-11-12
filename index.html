@@ -614,9 +614,19 @@ async function importFiles(selected) {
     const bookId = crypto.randomUUID();
     try {
       let refs = [];
-      if (/\.(cbz|zip)$/i.test(file.name)) {
+      // Algunos archivos .cbr son en realidad contenedores ZIP renombrados.
+      // Detectar el formato por la firma binaria evita enviarlos al motor RAR.
+      const signature = new Uint8Array(await file.slice(0, 8).arrayBuffer());
+      const isZipContainer =
+        signature[0] === 0x50 && signature[1] === 0x4B &&
+        ([0x03, 0x05, 0x07].includes(signature[2])) &&
+        ([0x04, 0x06, 0x08].includes(signature[3]));
+      const isRarContainer =
+        signature[0] === 0x52 && signature[1] === 0x61 &&
+        signature[2] === 0x72 && signature[3] === 0x21;
+      if (/\.(cbz|zip)$/i.test(file.name) || isZipContainer) {
         refs = await importZip(file, bookId);
-      } else if (/\.(cbr|rar)$/i.test(file.name)) {
+      } else if (/\.(cbr|rar)$/i.test(file.name) && isRarContainer) {
         refs = await importRar(file, bookId);
       } else if (file.type.startsWith('image/')) {
         refs = [await saveImportedPage(bookId, file.name, file, 0)];
