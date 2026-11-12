@@ -262,6 +262,14 @@ function saveLibrary() {
   localStorage.setItem(libraryKey, JSON.stringify(books));
   render();
 }
+function markCompletedAtEnd(book,total,currentPage){
+  if(!book || !total || currentPage < total-1 || book.status==='completed') return false;
+  book.status='completed';
+  book.completedAt=book.completedAt||Date.now();
+  localStorage.setItem(libraryKey,JSON.stringify(books));
+  render();
+  return true;
+}
 
 function natural(a, b) {
   return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
@@ -870,7 +878,7 @@ $('#verticalPages').addEventListener('scroll',()=>{
   const host=$('#verticalPages'), items=[...host.children], marker=host.getBoundingClientRect().top+host.clientHeight*.28;
   let nearest=0, distance=Infinity;
   items.forEach((img,i)=>{const d=Math.abs(img.getBoundingClientRect().top-marker);if(d<distance){distance=d;nearest=i;}});
-  page=nearest;const total=items.length;updateReaderProgress(total);active.last=page+1;localStorage.setItem(libraryKey,JSON.stringify(books));updateThumbnailSelection();
+  page=nearest;const total=items.length;updateReaderProgress(total);active.last=page+1;if(!markCompletedAtEnd(active,total,page))localStorage.setItem(libraryKey,JSON.stringify(books));updateThumbnailSelection();
 },{passive:true});
 
 let readerControlsTimer = null;
@@ -960,7 +968,7 @@ async function showPage() {
     }
     updateReaderProgress(refs.length);
     active.last = page + 1;
-    localStorage.setItem(libraryKey, JSON.stringify(books));
+    if(!markCompletedAtEnd(active,refs.length,page)) localStorage.setItem(libraryKey, JSON.stringify(books));
     updateThumbnailSelection();
   } catch (error) {
     alert(error.message || 'No se pudo cargar la página.');
