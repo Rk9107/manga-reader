@@ -724,7 +724,7 @@ let readerVertical = false;
 let verticalObserver = null;
 let verticalUrls = [];
 let thumbnailUrls = [];
-let zoomScale = 1, zoomX = 0, zoomY = 0, pinchStart = 0, pinchScale = 1, lastTapAt = 0;
+let zoomScale = 1, zoomX = 0, zoomY = 0, pinchStart = 0, pinchScale = 1, lastTapAt = 0, previousTapAt = 0;
 let activePointers = new Map();
 function resetZoom(){zoomScale=1;zoomX=0;zoomY=0;applyZoom();}
 function applyZoom(){
@@ -734,7 +734,8 @@ function applyZoom(){
 }
 function ensureVerticalPages(refs){
   const host=$('#verticalPages');
-  if(host.children.length===refs.length) return Promise.resolve();
+  if(host.dataset.bookId===active.id && host.children.length===refs.length) return Promise.resolve();
+  host.dataset.bookId=active.id;
   host.replaceChildren();
   verticalUrls.forEach(URL.revokeObjectURL); verticalUrls=[];
   const tasks=refs.map(async(ref,i)=>{
@@ -771,7 +772,7 @@ function updateThumbnailSelection(){
   list.querySelectorAll('.thumbnail-item').forEach((item,i)=>{item.classList.toggle('active',i===page);if(i===page && !$('#thumbnailTray').classList.contains('hidden'))item.scrollIntoView({block:'nearest',inline:'center'});});
 }
 function setVerticalMode(enabled){
-  readerVertical=enabled;$('#reader').classList.toggle('vertical-mode',enabled);
+  readerVertical=enabled;$('#reader').classList.toggle('vertical-mode',enabled);$('#verticalPages').classList.toggle('hidden',!enabled);
   $('#verticalBtn').textContent=enabled?'Página':'Vertical';
   $('#verticalBtn').title=enabled?'Volver a página individual':'Activar desplazamiento vertical';
   $('#pageArea').scrollTop=0;
@@ -782,14 +783,20 @@ $('#closeThumbnails').onclick=()=>$('#thumbnailTray').classList.add('hidden');
 $('#verticalBtn').onclick=()=>{setVerticalMode(!readerVertical);revealReaderControls();};
 $('#pageImage').addEventListener('touchstart',e=>{
   if(e.touches.length===2){pinchStart=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);pinchScale=zoomScale;}
-  else if(e.touches.length===1)lastTapAt=Date.now();
 },{passive:true});
 $('#pageImage').addEventListener('touchmove',e=>{
   if(e.touches.length===2 && pinchStart){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);zoomScale=Math.max(1,Math.min(4,pinchScale*d/pinchStart));applyZoom();e.preventDefault();}
 },{passive:false});
 $('#pageImage').addEventListener('touchend',e=>{
   if(e.touches.length<2)pinchStart=0;
-  if(e.changedTouches.length===1 && Date.now()-lastTapAt<280){zoomScale=zoomScale>1.05?1:2.2;applyZoom();}
+  if(e.changedTouches.length===1){const now=Date.now();if(now-previousTapAt<280){zoomScale=zoomScale>1.05?1:2.2;applyZoom();previousTapAt=0;}else previousTapAt=now;}
+},{passive:true});
+$('#verticalPages').addEventListener('scroll',()=>{
+  if(!readerVertical || !active)return;
+  const host=$('#verticalPages'), items=[...host.children], marker=host.getBoundingClientRect().top+host.clientHeight*.28;
+  let nearest=0, distance=Infinity;
+  items.forEach((img,i)=>{const d=Math.abs(img.getBoundingClientRect().top-marker);if(d<distance){distance=d;nearest=i;}});
+  page=nearest;const total=items.length;updateReaderProgress(total);active.last=page+1;localStorage.setItem(libraryKey,JSON.stringify(books));updateThumbnailSelection();
 },{passive:true});
 
 let readerControlsTimer = null;
