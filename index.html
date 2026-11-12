@@ -1411,7 +1411,7 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
 render();
 </script>
 <script>
-/* Frases breves de TORII: solo cambia el texto decorativo, sin guardar datos. */
+/* Frases, dichos y poemas breves de TORII: una selección estable por día. */
 (() => {
   const phrases = [
     ["自分のペースで","A tu propio ritmo."],
@@ -1421,26 +1421,40 @@ render();
     ["読書を楽しもう","Disfruta la lectura."],
     ["新しい世界","Un mundo nuevo."],
     ["続きが待っている","La historia te espera."],
-    ["心ゆくまで","Lee hasta quedar satisfecho."]
+    ["心ゆくまで","Lee hasta quedar satisfecho."],
+    ["七転び八起き","Caer siete veces, levantarse ocho."],
+    ["急がば回れ","Si tienes prisa, toma el camino seguro."],
+    ["塵も積もれば山となる","Hasta el polvo, al juntarse, forma una montaña."],
+    ["花より団子","Más que las apariencias, importa lo que disfrutas."],
+    ["猿も木から落ちる","Hasta el experto puede equivocarse."],
+    ["雨降って地固まる","Después de la lluvia, la tierra se fortalece."],
+    ["千里の道も一歩から","Un viaje de mil leguas comienza con un paso."],
+    ["月がきれいですね","La luna está hermosa esta noche."],
+    ["夜の静けさに、物語が灯る","En el silencio de la noche, una historia se enciende."],
+    ["ページをめくれば、景色が変わる","Al pasar la página, cambia el paisaje."],
+    ["小さな一歩が、明日をつくる","Un pequeño paso construye el mañana."],
+    ["心に残る物語は、いつまでも消えない","Las historias que llegan al corazón nunca desaparecen."],
+    ["風は見えなくても、季節を運ぶ","Aunque no veas el viento, trae consigo las estaciones."],
+    ["遠い世界も、一冊から始まる","Un mundo lejano puede comenzar en un libro."],
+    ["静けさの中に、答えがある","A veces, la respuesta vive en el silencio."],
+    ["読み終えた先に、新しい旅がある","Al terminar una historia, comienza otro viaje."],
+    ["今日という日に、一つの物語を","Regálale una historia al día de hoy."],
+    ["桜は散っても、春の記憶は残る","Aunque caigan los cerezos, el recuerdo de la primavera permanece."],
+    ["暗い夜ほど、星はよく見える","Cuanto más oscura la noche, mejor brillan las estrellas."],
+    ["物語は、読む人の心で完成する","Una historia se completa en el corazón de quien la lee."],
+    ["焦らず、比べず、自分の道を","Sin prisa ni comparaciones: sigue tu propio camino."],
+    ["また明日、新しいページへ","Mañana será otra página por descubrir."]
   ];
   const el = document.getElementById("toriiWhisper");
   if (!el) return;
-  let current = -1;
-  const showPhrase = () => {
-    let next = Math.floor(Math.random() * phrases.length);
-    if (phrases.length > 1 && next === current) next = (next + 1) % phrases.length;
-    current = next;
-    el.classList.add("is-changing");
-    window.setTimeout(() => {
-      const [jp, translation] = phrases[current];
-      el.querySelector(".torii-whisper-jp").textContent = jp;
-      el.querySelector(".torii-whisper-translation").textContent = translation;
-      el.classList.remove("is-changing");
-    }, 260);
-  };
-  showPhrase();
-  window.setInterval(showPhrase, 18000);
-})();
-</script>
+  const now = new Date();
+  const dayNumber = Math.floor(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) / 86400000);
+  const [jp, translation] = phrases[((dayNumber % phrases.length) + phrases.length) % phrases.length];
+  const jpEl = el.querySelector(".torii-whisper-jp");
+  const translationEl = el.querySelector(".torii-whisper-translation");
+  if (jpEl) jpEl.textContent = jp;
+  if (translationEl) translationEl.textContent = translation;
+  el.classList.remove("is-changing");
+})();</script>
 
 </body></html>
