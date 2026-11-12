@@ -1,7 +1,7 @@
-/* Manga Reader — Service Worker
+/* Yomibako — Service Worker
    Compatible con GitHub Pages en /manga-reader/
 */
-const CACHE_NAME = "manga-reader-shell-v8";
+const CACHE_NAME = "yomibako-shell-v9";
 
 const APP_SHELL = [
   "./",
@@ -25,7 +25,7 @@ self.addEventListener("activate", (event) => {
       .then((keys) =>
         Promise.all(
           keys
-            .filter((key) => key.startsWith("manga-reader-shell-") && key !== CACHE_NAME)
+            .filter((key) => key.startsWith("yomibako-shell-") && key !== CACHE_NAME)
             .map((key) => caches.delete(key))
         )
       )
