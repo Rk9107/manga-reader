@@ -177,10 +177,15 @@ button.primary{background:#aaa9ad;color:#101012}
 .activity-day span{font-size:10px;color:#929196}
 .activity-note{margin:12px 0 0;color:#929196;font-size:12px}
 @media(max-width:560px){.activity-panel{padding:14px}.activity-heading{align-items:flex-start;flex-direction:column}.activity-metrics{gap:7px}.activity-metric{padding:9px}.activity-metric b{font-size:18px}.activity-metric span{font-size:11px}.activity-week{gap:5px}}
-.metadata-tools{display:grid;gap:6px;padding:10px;border:1px solid #38383d;border-radius:10px;background:#ffffff08}.metadata-tools button{width:100%}.metadata-tools small{font-size:11px}</style></head>
+.metadata-tools{display:grid;gap:6px;padding:10px;border:1px solid #38383d;border-radius:10px;background:#ffffff08}.metadata-tools button{width:100%}.metadata-tools small{font-size:11px}/* Frase japonesa decorativa: no participa en el lector ni en el almacenamiento. */
+.torii-whisper{display:flex;align-items:center;gap:12px;margin-top:20px;padding-top:13px;border-top:1px solid #ffffff20;min-height:42px}
+.torii-whisper-jp{font-family:serif;font-size:17px;letter-spacing:.12em;color:#e5b7c8;white-space:nowrap}
+.torii-whisper-translation{font-size:12px;letter-spacing:.04em;color:#c7c4c9}
+@media(max-width:700px){.torii-whisper{margin-top:16px;padding-top:11px}.torii-whisper-jp{font-size:15px}}
+</style></head>
 <body>
 <aside class="sidebar"><div class="sidebar-brand"><img src="icon.svg" alt=""><div><strong>TORII</strong><small>La puerta a otros mundos</small></div></div><nav class="side-nav" aria-label="Navegación principal"><a href="#library" data-view="library" class="active"><span>▦</span> Biblioteca</a><a href="#shelfBar" data-view="shelves"><span>▤</span> Estantes</a><a href="#library" data-view="series"><span>▧</span> Series</a><a href="#library" data-view="reading"><span>◷</span> Lecturas</a><a href="#backup" data-view="downloads"><span>↓</span> Respaldos</a><a href="#settings" data-view="settings"><span>⚙</span> Ajustes</a></nav><div class="side-note">Un espacio personal para explorar historias.<br><span style="color:#eee">静かに読もう · Lee a tu ritmo.</span></div></aside><header class="top"><div class="brand"><img src="icon.svg" alt=""><span>TORII</span></div><div class="spacer"></div><input id="fileInput" class="file-picker-native" type="file" aria-label="Añadir tomo" accept=".cbr,.rar,.cbz,.zip,.jpg,.jpeg,.png,.webp,.gif,.bmp,image/*" multiple></header>
-<main class="wrap"><section class="hero"><div class="hero-content"><div class="hero-kicker">TORII · TU BIBLIOTECA PERSONAL</div><h1>Tu colección, en su lugar.</h1><div class="muted">Una estantería personal para tus mangas, cómics e historias favoritas.</div><div class="actions"><input id="fileInputHero" class="file-picker-native" type="file" aria-label="Añadir tomos" accept=".cbr,.rar,.cbz,.zip,.jpg,.jpeg,.png,.webp,.gif,.bmp,image/*" multiple><button id="createShelfBtn">＋ Crear estante</button><button id="installBtn" class="hidden">Instalar aplicación</button></div><div class="tools"><button id="exportBtn">↓ Respaldar biblioteca</button><button id="backupInputBtn">↑ Restaurar respaldo</button><input id="backupInput" type="file" accept="application/json,.json" class="hidden"></div><div class="notice">Los mangas se procesan en tu navegador. No subas tus archivos CBR/CBZ a GitHub: este sitio solo contiene el lector.</div></div></section>
+<main class="wrap"><section class="hero"><div class="hero-content"><div class="hero-kicker">TORII · TU BIBLIOTECA PERSONAL</div><h1>Tu colección, en su lugar.</h1><div class="muted">Una estantería personal para tus mangas, cómics e historias favoritas.</div><div class="torii-whisper" id="toriiWhisper" aria-live="polite"><span class="torii-whisper-jp">自分のペースで</span><span class="torii-whisper-translation">A tu propio ritmo.</span></div><div class="actions"><input id="fileInputHero" class="file-picker-native" type="file" aria-label="Añadir tomos" accept=".cbr,.rar,.cbz,.zip,.jpg,.jpeg,.png,.webp,.gif,.bmp,image/*" multiple><button id="createShelfBtn">＋ Crear estante</button><button id="installBtn" class="hidden">Instalar aplicación</button></div><div class="tools"><button id="exportBtn">↓ Respaldar biblioteca</button><button id="backupInputBtn">↑ Restaurar respaldo</button><input id="backupInput" type="file" accept="application/json,.json" class="hidden"></div><div class="notice">Los mangas se procesan en tu navegador. No subas tus archivos CBR/CBZ a GitHub: este sitio solo contiene el lector.</div></div></section>
 <section id="continuePanel" class="continue-panel hidden"><div class="continue-copy"><div class="hero-kicker">TU ÚLTIMA LECTURA</div><h2 id="continueTitle">Continuar leyendo</h2><p id="continueDetail" class="muted"></p><div class="progressline"><i id="continueProgress"></i></div><button id="continueBtn" class="primary">▶ Continuar leyendo</button></div><div class="continue-cover" id="continueCover">読</div></section>
 <section id="activityPanel" class="activity-panel"><div class="activity-heading"><div><div class="hero-kicker">TORII · TU RECORRIDO</div><h2>Mi actividad</h2></div><span class="muted">Guardado en este dispositivo</span></div><div class="activity-metrics"><div class="activity-metric"><b id="activityPages">0</b><span>Páginas leídas</span></div><div class="activity-metric"><b id="activityTime">0 min</b><span>Tiempo de lectura</span></div><div class="activity-metric"><b id="activityDays">0</b><span>Días activos</span></div></div><div class="activity-week" id="activityWeek" aria-label="Actividad de los últimos siete días"></div><p class="activity-note" id="activityNote">Tus estadísticas aparecerán conforme leas.</p></section>
 <div class="stats"><div class="stat"><b id="totalStat">0</b> tomos</div><div class="stat"><b id="seriesStat">0</b> series</div><div class="stat"><b id="readingStat">0</b> leyendo</div><div class="stat"><b id="doneStat">0</b> series terminadas</div></div><div class="shelfbar" id="shelfBar"></div><div class="collectionhead"><button id="backToShelves" class="hidden">← Estantes</button><div><strong id="collectionHeading">Mis estantes</strong><div class="muted" id="collectionSub">Tus series organizadas como una biblioteca.</div></div><div class="spacer"></div><button id="deleteSeriesBtn" class="hidden" style="border-color:#8d4545;color:#ff9b9b">Eliminar manga</button></div><div class="toolbar"><input id="search" placeholder="Buscar en tu biblioteca…"><select id="statusFilter"><option value="all">Todos los estados</option><option value="reading">Leyendo</option><option value="planned">Pendientes</option><option value="completed">Terminados</option></select><select id="genreFilter"><option value="all">Todos los géneros</option></select><span class="muted" id="count">0 mangas</span></div><section id="library" class="grid"></section><section id="empty" class="empty"><div style="font-size:38px;margin-bottom:10px">▤</div><strong>Tu estantería está esperando nuevas historias</strong><p>Importa tus tomos y organízalos por serie y estante.</p></section></main>
@@ -1324,4 +1329,51 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   navigator.serviceWorker.register('./sw.js').catch(console.warn);
 }
 render();
-</script></body></html>
+</script>
+<script>
+/* Frases de TORII: una por día local. No usa almacenamiento ni temporizadores. */
+(() => {
+  const phrases = [
+    ["自分のペースで","A tu propio ritmo."],
+    ["物語の世界へ","Entra al mundo de las historias."],
+    ["一ページずつ","Una página a la vez."],
+    ["静かな時間","Un momento de calma."],
+    ["読書を楽しもう","Disfruta la lectura."],
+    ["新しい世界","Un mundo nuevo."],
+    ["続きが待っている","La historia te espera."],
+    ["心ゆくまで","Lee hasta quedar satisfecho."],
+    ["七転び八起き","Caer siete veces, levantarse ocho."],
+    ["急がば回れ","Si tienes prisa, toma el camino seguro."],
+    ["塵も積もれば山となる","Hasta el polvo, al juntarse, forma una montaña."],
+    ["花より団子","Más que las apariencias, importa lo que disfrutas."],
+    ["猿も木から落ちる","Hasta el experto puede equivocarse."],
+    ["雨降って地固まる","Después de la lluvia, la tierra se fortalece."],
+    ["千里の道も一歩から","Un viaje de mil leguas comienza con un paso."],
+    ["月がきれいですね","La luna está hermosa esta noche."],
+    ["夜の静けさに、物語が灯る","En el silencio de la noche, una historia se enciende."],
+    ["ページをめくれば、景色が変わる","Al pasar la página, cambia el paisaje."],
+    ["小さな一歩が、明日をつくる","Un pequeño paso construye el mañana."],
+    ["心に残る物語は、いつまでも消えない","Las historias que llegan al corazón nunca desaparecen."],
+    ["風は見えなくても、季節を運ぶ","Aunque no veas el viento, trae consigo las estaciones."],
+    ["遠い世界も、一冊から始まる","Un mundo lejano puede comenzar en un libro."],
+    ["静けさの中に、答えがある","A veces, la respuesta vive en el silencio."],
+    ["読み終えた先に、新しい旅がある","Al terminar una historia, comienza otro viaje."],
+    ["今日という日に、一つの物語を","Regálale una historia al día de hoy."],
+    ["桜は散っても、春の記憶は残る","Aunque caigan los cerezos, el recuerdo de la primavera permanece."],
+    ["暗い夜ほど、星はよく見える","Cuanto más oscura la noche, mejor brillan las estrellas."],
+    ["物語は、読む人の心で完成する","Una historia se completa en el corazón de quien la lee."],
+    ["焦らず、比べず、自分の道を","Sin prisa ni comparaciones: sigue tu propio camino."],
+    ["また明日、新しいページへ","Mañana será otra página por descubrir."]
+  ];
+  const el = document.getElementById("toriiWhisper");
+  if (!el) return;
+  const now = new Date();
+  const dayNumber = Math.floor(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) / 86400000);
+  const [jp, translation] = phrases[((dayNumber % phrases.length) + phrases.length) % phrases.length];
+  const jpEl = el.querySelector(".torii-whisper-jp");
+  const translationEl = el.querySelector(".torii-whisper-translation");
+  if (jpEl) jpEl.textContent = jp;
+  if (translationEl) translationEl.textContent = translation;
+})();
+</script>
+</body></html>
