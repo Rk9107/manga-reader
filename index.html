@@ -751,7 +751,7 @@ async function showPage() {
 async function turn(delta) {
   if (!active) return;
   const refs = await getBookRefs(active);
-  const nextPage = Math.max(0, Math.min(refs.length - 1, page + (rtl ? -delta : delta)));
+  const nextPage = Math.max(0, Math.min(refs.length - 1, page + delta));
   if (nextPage === page) return;
   page = nextPage;
   await showPage();
@@ -800,7 +800,7 @@ $('#pageArea').addEventListener('touchstart', event => {
 $('#pageArea').addEventListener('touchend', event => {
   const dx = event.changedTouches[0].clientX - startX;
   const dy = event.changedTouches[0].clientY - startY;
-  if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.2) turn((dx < 0 ? 1 : -1) * (rtl ? -1 : 1));
+  if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.2) turn(rtl ? (dx < 0 ? 1 : -1) : (dx < 0 ? -1 : 1));
 }, { passive: true });
 document.addEventListener('keydown', event => {
   if (!$('#reader').classList.contains('show')) return;
