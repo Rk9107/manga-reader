@@ -630,6 +630,7 @@ async function importFiles(selected) {
         created: Date.now()
       });
       saveLibrary();
+      render();
       setStatus(`¡${file.name} se importó correctamente!`, 100);
     } catch (error) {
       console.error(error);
