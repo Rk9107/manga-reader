@@ -1,11 +1,11 @@
 {
-  "name": "Yomibako — Tu biblioteca de manga",
-  "short_name": "Yomibako",
+  "name": "TORII — La puerta a otros mundos",
+  "short_name": "TORII",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#111114",
-  "theme_color": "#111114",
+  "background_color": "#aaa9ad",
+  "theme_color": "#aaa9ad",
   "description": "Tu estantería personal para manga y cómics.",
   "icons": [
     {
