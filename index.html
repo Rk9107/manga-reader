@@ -177,7 +177,83 @@ button.primary{background:#aaa9ad;color:#101012}
 .activity-day span{font-size:10px;color:#929196}
 .activity-note{margin:12px 0 0;color:#929196;font-size:12px}
 @media(max-width:560px){.activity-panel{padding:14px}.activity-heading{align-items:flex-start;flex-direction:column}.activity-metrics{gap:7px}.activity-metric{padding:9px}.activity-metric b{font-size:18px}.activity-metric span{font-size:11px}.activity-week{gap:5px}}
-.metadata-tools{display:grid;gap:6px;padding:10px;border:1px solid #38383d;border-radius:10px;background:#ffffff08}.metadata-tools button{width:100%}.metadata-tools small{font-size:11px}</style></head>
+.metadata-tools{display:grid;gap:6px;padding:10px;border:1px solid #38383d;border-radius:10px;background:#ffffff08}.metadata-tools button{width:100%}.metadata-tools small{font-size:11px}
+/* TORII UI refinement — presentation only; no changes to reader logic or local data */
+:root{scrollbar-color:#45454b #0b0b0d;scroll-behavior:smooth}
+body{font-feature-settings:"ss01" on,"cv11" on}
+button,.file-picker-native,.shelfchip,.card{ -webkit-tap-highlight-color:transparent}
+button{font-weight:600;box-shadow:0 1px 0 #ffffff08 inset;transition:transform .16s ease,border-color .16s ease,background .16s ease,box-shadow .16s ease}
+button:active{transform:scale(.975)}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #aaa9ad;outline-offset:3px}
+button.primary{box-shadow:0 5px 18px #aaa9ad18}
+.top{box-shadow:0 8px 24px #0003}
+.sidebar{box-shadow:12px 0 34px #0002}
+.sidebar-brand{padding-bottom:22px}
+.sidebar-brand img{box-shadow:0 5px 18px #0006}
+.side-nav{gap:6px}
+.side-nav a{min-height:46px;border:1px solid transparent;transition:background .18s ease,border-color .18s ease,transform .18s ease}
+.side-nav a:hover{background:#ffffff08;border-color:#ffffff0c;transform:translateX(2px)}
+.side-nav a.active{box-shadow:0 5px 18px #aaa9ad18}
+.hero{box-shadow:0 16px 42px #0003}
+.hero-content{max-width:760px}
+.hero-kicker{font-weight:700}
+.stats .stat{min-height:78px;display:flex;flex-direction:column;justify-content:center;gap:3px}
+.stat b{font-variant-numeric:tabular-nums}
+.activity-panel,.continue-panel{box-shadow:0 12px 32px #0002}
+.activity-metric{transition:border-color .18s ease,background .18s ease}
+.activity-metric:hover{border-color:#ffffff20;background:#ffffff0c}
+.toolbar input,.toolbar select,.field input,.field select,.field textarea{transition:border-color .18s ease,box-shadow .18s ease}
+.toolbar input:focus,.toolbar select:focus,.field input:focus,.field select:focus,.field textarea:focus{border-color:#77767b;box-shadow:0 0 0 3px #aaa9ad12;outline:none}
+.grid{align-items:start}
+.card{box-shadow:0 5px 18px #0002}
+.card:active{transform:scale(.985)}
+.cover img,.seriescover img{transition:transform .35s ease}
+.card:hover .cover img,.card:hover .seriescover img{transform:scale(1.025)}
+.info strong{line-height:1.35}
+.info small,.meta{line-height:1.45}
+.progressline{height:5px}
+.progressline>i{border-radius:99px}
+.shelfchip{transition:background .18s ease,border-color .18s ease,color .18s ease}
+.shelfchip:hover{border-color:#77767b;color:#f0eff1}
+.collectionhead{min-height:42px}
+.collectionhead strong{line-height:1.2}
+.dialog{box-shadow:0 24px 80px #0009}
+.modal{backdrop-filter:blur(7px)}
+.empty{background:linear-gradient(145deg,#111113,#0c0c0e)}
+.file-picker-native{max-width:260px}
+@media(min-width:721px) and (max-width:1100px){
+ .sidebar{display:flex;width:232px;padding:20px 14px}
+ .sidebar-brand img{width:46px;height:46px}
+ .sidebar-brand strong{font-size:21px;letter-spacing:5px}
+ .top{height:70px;padding:10px 22px 10px 254px}
+ .top .brand{display:none}
+ .wrap{padding:24px 24px 76px 254px}
+ .grid{grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:13px}
+ .hero{min-height:230px}
+ .stats{gap:9px}
+ .stat{padding:12px}
+}
+@media(max-width:720px){
+ body{padding-bottom:env(safe-area-inset-bottom)}
+ .top{padding-top:max(10px,env(safe-area-inset-top))}
+ .wrap{padding-left:15px;padding-right:15px;padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+ .hero{border-radius:17px}
+ .activity-panel,.continue-panel{border-radius:15px}
+ .card{border-radius:12px}
+ .info{padding:10px}
+ .collectionhead{gap:9px}
+ .collectionhead .muted{font-size:12px}
+}
+@media(hover:none){
+ .card:hover{transform:none;box-shadow:0 5px 18px #0002}
+ .card:hover .cover img,.card:hover .seriescover img{transform:none}
+ .side-nav a:hover{transform:none}
+}
+@media(prefers-reduced-motion:reduce){
+ *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+
+</style></head>
 <body>
 <aside class="sidebar"><div class="sidebar-brand"><img src="icon.svg" alt=""><div><strong>TORII</strong><small>La puerta a otros mundos</small></div></div><nav class="side-nav" aria-label="Navegación principal"><a href="#library" data-view="library" class="active"><span>▦</span> Biblioteca</a><a href="#shelfBar" data-view="shelves"><span>▤</span> Estantes</a><a href="#library" data-view="series"><span>▧</span> Series</a><a href="#library" data-view="reading"><span>◷</span> Lecturas</a><a href="#backup" data-view="downloads"><span>↓</span> Respaldos</a><a href="#settings" data-view="settings"><span>⚙</span> Ajustes</a></nav><div class="side-note">Un espacio personal para explorar historias.<br><span style="color:#eee">静かに読もう · Lee a tu ritmo.</span></div></aside><header class="top"><div class="brand"><img src="icon.svg" alt=""><span>TORII</span></div><div class="spacer"></div><input id="fileInput" class="file-picker-native" type="file" aria-label="Añadir tomo" accept=".cbr,.rar,.cbz,.zip,.jpg,.jpeg,.png,.webp,.gif,.bmp,image/*" multiple></header>
 <main class="wrap"><section class="hero"><div class="hero-content"><div class="hero-kicker">TORII · TU BIBLIOTECA PERSONAL</div><h1>Tu colección, en su lugar.</h1><div class="muted">Una estantería personal para tus mangas, cómics e historias favoritas.</div><div class="actions"><input id="fileInputHero" class="file-picker-native" type="file" aria-label="Añadir tomos" accept=".cbr,.rar,.cbz,.zip,.jpg,.jpeg,.png,.webp,.gif,.bmp,image/*" multiple><button id="createShelfBtn">＋ Crear estante</button><button id="installBtn" class="hidden">Instalar aplicación</button></div><div class="tools"><button id="exportBtn">↓ Respaldar biblioteca</button><button id="backupInputBtn">↑ Restaurar respaldo</button><input id="backupInput" type="file" accept="application/json,.json" class="hidden"></div><div class="notice">Los mangas se procesan en tu navegador. No subas tus archivos CBR/CBZ a GitHub: este sitio solo contiene el lector.</div></div></section>
