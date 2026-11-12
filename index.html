@@ -322,6 +322,48 @@ let dbPromise;
 try { books = JSON.parse(localStorage.getItem(libraryKey) || '[]'); } catch {}
 books = books.map(book => ({...book, series: book.series || inferSeries(book.title), shelf: book.shelf || 'Principal'}));
 
+/* Sincroniza pestañas y sesiones restauradas sin permitir que una lista vacía
+   sobrescriba una biblioteca que ya está cargada en memoria. */
+function syncLibraryFromStorage({forceRender=false}={}) {
+  try {
+    const raw = localStorage.getItem(libraryKey);
+    if (!raw) return false;
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed) || parsed.length === 0) return false;
+    const normalized = parsed.map(book => ({
+      ...book,
+      series: book.series || inferSeries(book.title),
+      shelf: book.shelf || 'Principal'
+    }));
+    const currentIds = books.map(book => book.id).join('|');
+    const nextIds = normalized.map(book => book.id).join('|');
+    const changed = currentIds !== nextIds || JSON.stringify(books) !== JSON.stringify(normalized);
+    if (changed) {
+      books = normalized;
+      const embedded = books.find(book => book._toriiReadingStats)?._toriiReadingStats;
+      if (embedded) readingStats = {...readingStats, ...embedded};
+      if (forceRender) render();
+    }
+    return changed;
+  } catch (error) {
+    console.warn('[TORII] No se pudo sincronizar la biblioteca local:', error);
+    return false;
+  }
+}
+window.addEventListener('storage', event => {
+  if (event.key === libraryKey && event.newValue) syncLibraryFromStorage({forceRender:true});
+});
+window.addEventListener('pageshow', () => {
+  syncLibraryFromStorage({forceRender:true});
+});
+window.addEventListener('focus', () => {
+  syncLibraryFromStorage({forceRender:true});
+});
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) syncLibraryFromStorage({forceRender:true});
+});
+
+
 function db() {
   if (!dbPromise) dbPromise = new Promise((resolve, reject) => {
     const request = indexedDB.open('MangaReaderDB', 2);
@@ -1409,6 +1451,11 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   navigator.serviceWorker.register('./sw.js').catch(console.warn);
 }
 render();
+// Reintento corto para sesiones restauradas por Android/Chrome; nunca escribe ni borra datos.
+if (!books.length) {
+  window.setTimeout(() => syncLibraryFromStorage({forceRender:true}), 350);
+  window.setTimeout(() => syncLibraryFromStorage({forceRender:true}), 1200);
+}
 </script>
 <script>
 /* Frases, dichos y poemas breves de TORII: una selección estable por día. */
