@@ -468,17 +468,16 @@ function setStatus(message, percent = null) {
   if (!box) {
     box = document.createElement('div');
     box.id = 'status';
-    box.className = 'notice';
-    $('.hero').append(box);
+    box.setAttribute('role', 'status');
+    box.setAttribute('aria-live', 'polite');
+    box.style.cssText = 'position:fixed;left:12px;right:12px;bottom:12px;z-index:99999;max-width:720px;margin:0 auto;padding:14px 16px;background:#202024;color:#f4f3f5;border:1px solid #aaa9ad;border-radius:12px;box-shadow:0 8px 30px #000a;font:14px/1.45 system-ui,sans-serif;display:none';
+    document.body.append(box);
   }
-  box.innerHTML = '';
-  if (!message) {
-    box.classList.add('hidden');
-    return;
-  }
-  box.classList.remove('hidden');
+  box.replaceChildren();
+  if (!message) { box.style.display = 'none'; return; }
+  box.style.display = 'block';
   const row = document.createElement('div');
-  row.className = 'statusrow';
+  row.style.cssText = 'display:flex;justify-content:space-between;gap:12px;align-items:center';
   const label = document.createElement('span');
   label.textContent = message;
   const value = document.createElement('strong');
@@ -487,9 +486,9 @@ function setStatus(message, percent = null) {
   box.append(row);
   if (percent !== null) {
     const line = document.createElement('div');
-    line.className = 'progressline';
+    line.style.cssText = 'height:6px;background:#45454b;border-radius:99px;overflow:hidden;margin-top:9px';
     const fill = document.createElement('i');
-    fill.style.width = `${Math.max(0, Math.min(100, percent))}%`;
+    fill.style.cssText = `display:block;height:100%;width:${Math.max(0, Math.min(100, percent))}%;background:#aaa9ad;transition:width .15s`;
     line.append(fill);
     box.append(line);
   }
@@ -654,7 +653,7 @@ async function importFiles(selected) {
       setStatus(`¡${file.name} se importó correctamente!`, 100);
     } catch (error) {
       console.error(error);
-      setStatus('');
+      setStatus(`No pude abrir ${file.name}: ${error.message || error}`, null);
       alert(`No pude abrir ${file.name}: ${error.message || error}`);
       // Elimina páginas parciales de una importación fallida.
       try {
@@ -673,7 +672,7 @@ async function importFiles(selected) {
       }
     }
   }
-  setTimeout(() => setStatus(''), 3500);
+  // Mantener el resultado visible en Android hasta la siguiente acción del usuario.
 }
 
 async function getBookRefs(book) {
@@ -835,22 +834,23 @@ document.addEventListener('keydown', event => {
 });
 
 async function handleMangaFileSelection(event) {
-  const selected = Array.from(event.target.files || []);
-  const inputId = event.target.id || 'selector';
-  // Vaciar después de conservar los File, para permitir volver a elegir el mismo archivo.
-  event.target.value = '';
+  const input = event.currentTarget;
+  const selected = Array.from(input.files || []);
+  const inputId = input.id || 'selector';
   if (!selected.length) {
-    setStatus('El selector se cerró sin entregar ningún archivo a TORII.', null);
+    setStatus('Chrome no entregó ningún archivo a TORII. Intenta de nuevo desde Añadir tomos.', null);
     return;
   }
   const file = selected[0];
-  setStatus(`Archivo recibido: ${file.name} · ${(file.size / 1048576).toFixed(1)} MB. Preparando importación…`, 1);
+  setStatus(`Android entregó el archivo: ${file.name} · ${(file.size / 1048576).toFixed(1)} MB. Leyendo archivo…`, 1);
   console.info('[TORII] selección recibida', { inputId, name: file.name, size: file.size, type: file.type });
   try {
     await importFiles(selected);
   } catch (error) {
     console.error('[TORII] error inesperado al importar', error);
-    setStatus(`Error al importar: ${error?.message || String(error)}`, null);
+    setStatus(`FALLO TORII: ${error?.message || String(error)}`, null);
+  } finally {
+    input.value = '';
   }
 }
 $('#fileInput').addEventListener('change', handleMangaFileSelection);
