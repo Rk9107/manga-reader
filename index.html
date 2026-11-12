@@ -19,6 +19,7 @@ const coverObjectUrls = new Set();
 const libraryKey = 'manga-reader-library-v1';
 const shelvesKey = 'yomibako-shelves-v1';
 let shelves = JSON.parse(localStorage.getItem(shelvesKey) || '["Principal","Horror","Ciencia ficción","Misterio","Supervivencia"]');
+if (!shelves.includes("Principal")) shelves.unshift("Principal");
 function saveShelves(){ localStorage.setItem(shelvesKey, JSON.stringify(shelves)); }
 function inferSeries(title){ return (title || "").replace(/\s*(?:[-_ ]?(?:tomo|vol(?:umen)?|volume|cap(?:ítulo)?|#)\s*0*\d+|\s*0*\d+)$/i, "").replace(/\s*[-_]+$/, "").trim() || title || "Sin serie"; }
 let dbPromise;
