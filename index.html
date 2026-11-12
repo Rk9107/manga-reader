@@ -253,10 +253,20 @@ button.primary{box-shadow:0 5px 18px #aaa9ad18}
  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
 
+
+/* TORII hero declutter + Japanese rotating motto */
+.hero{min-height:205px;padding:30px 32px}
+.hero-content{max-width:780px}
+.torii-whisper{display:flex;align-items:center;gap:12px;margin-top:24px;padding-top:15px;border-top:1px solid #ffffff20;min-height:43px;transition:opacity .35s ease}
+.torii-whisper.is-changing{opacity:0}
+.torii-whisper-jp{font-family:serif;font-size:17px;letter-spacing:.12em;color:#e5b7c8}
+.torii-whisper-translation{font-size:12px;letter-spacing:.04em;color:#c7c4c9}
+@media(max-width:700px){.hero{min-height:190px;padding:23px 20px}.torii-whisper{margin-top:18px;padding-top:12px}.torii-whisper-jp{font-size:15px}}
+
 </style></head>
 <body>
 <aside class="sidebar"><div class="sidebar-brand"><img src="icon.svg" alt=""><div><strong>TORII</strong><small>La puerta a otros mundos</small></div></div><nav class="side-nav" aria-label="Navegación principal"><a href="#library" data-view="library" class="active"><span>▦</span> Biblioteca</a><a href="#shelfBar" data-view="shelves"><span>▤</span> Estantes</a><a href="#library" data-view="series"><span>▧</span> Series</a><a href="#library" data-view="reading"><span>◷</span> Lecturas</a><a href="#backup" data-view="downloads"><span>↓</span> Respaldos</a><a href="#settings" data-view="settings"><span>⚙</span> Ajustes</a></nav><div class="side-note">Un espacio personal para explorar historias.<br><span style="color:#eee">静かに読もう · Lee a tu ritmo.</span></div></aside><header class="top"><div class="brand"><img src="icon.svg" alt=""><span>TORII</span></div><div class="spacer"></div><input id="fileInput" class="file-picker-native" type="file" aria-label="Añadir tomo" accept=".cbr,.rar,.cbz,.zip,.jpg,.jpeg,.png,.webp,.gif,.bmp,image/*" multiple></header>
-<main class="wrap"><section class="hero"><div class="hero-content"><div class="hero-kicker">TORII · TU BIBLIOTECA PERSONAL</div><h1>Tu colección, en su lugar.</h1><div class="muted">Una estantería personal para tus mangas, cómics e historias favoritas.</div><div class="actions"><input id="fileInputHero" class="file-picker-native" type="file" aria-label="Añadir tomos" accept=".cbr,.rar,.cbz,.zip,.jpg,.jpeg,.png,.webp,.gif,.bmp,image/*" multiple><button id="createShelfBtn">＋ Crear estante</button><button id="installBtn" class="hidden">Instalar aplicación</button></div><div class="tools"><button id="exportBtn">↓ Respaldar biblioteca</button><button id="backupInputBtn">↑ Restaurar respaldo</button><input id="backupInput" type="file" accept="application/json,.json" class="hidden"></div><div class="notice">Los mangas se procesan en tu navegador. No subas tus archivos CBR/CBZ a GitHub: este sitio solo contiene el lector.</div></div></section>
+<main class="wrap"><section class="hero"><div class="hero-content"><div class="hero-kicker">TORII · TU BIBLIOTECA PERSONAL</div><h1>Tu colección, en su lugar.</h1><div class="muted">Una estantería personal para tus mangas, cómics e historias favoritas.</div><div class="torii-whisper" id="toriiWhisper" aria-live="polite"><span class="torii-whisper-jp">自分のペースで</span><span class="torii-whisper-translation">A tu propio ritmo.</span></div></div></section>
 <section id="continuePanel" class="continue-panel hidden"><div class="continue-copy"><div class="hero-kicker">TU ÚLTIMA LECTURA</div><h2 id="continueTitle">Continuar leyendo</h2><p id="continueDetail" class="muted"></p><div class="progressline"><i id="continueProgress"></i></div><button id="continueBtn" class="primary">▶ Continuar leyendo</button></div><div class="continue-cover" id="continueCover">読</div></section>
 <section id="activityPanel" class="activity-panel"><div class="activity-heading"><div><div class="hero-kicker">TORII · TU RECORRIDO</div><h2>Mi actividad</h2></div><span class="muted">Guardado en este dispositivo</span></div><div class="activity-metrics"><div class="activity-metric"><b id="activityPages">0</b><span>Páginas leídas</span></div><div class="activity-metric"><b id="activityTime">0 min</b><span>Tiempo de lectura</span></div><div class="activity-metric"><b id="activityDays">0</b><span>Días activos</span></div></div><div class="activity-week" id="activityWeek" aria-label="Actividad de los últimos siete días"></div><p class="activity-note" id="activityNote">Tus estadísticas aparecerán conforme leas.</p></section>
 <div class="stats"><div class="stat"><b id="totalStat">0</b> tomos</div><div class="stat"><b id="seriesStat">0</b> series</div><div class="stat"><b id="readingStat">0</b> leyendo</div><div class="stat"><b id="doneStat">0</b> series terminadas</div></div><div class="shelfbar" id="shelfBar"></div><div class="collectionhead"><button id="backToShelves" class="hidden">← Estantes</button><div><strong id="collectionHeading">Mis estantes</strong><div class="muted" id="collectionSub">Tus series organizadas como una biblioteca.</div></div><div class="spacer"></div><button id="deleteSeriesBtn" class="hidden" style="border-color:#8d4545;color:#ff9b9b">Eliminar manga</button></div><div class="toolbar"><input id="search" placeholder="Buscar en tu biblioteca…"><select id="statusFilter"><option value="all">Todos los estados</option><option value="reading">Leyendo</option><option value="planned">Pendientes</option><option value="completed">Terminados</option></select><select id="genreFilter"><option value="all">Todos los géneros</option></select><span class="muted" id="count">0 mangas</span></div><section id="library" class="grid"></section><section id="empty" class="empty"><div style="font-size:38px;margin-bottom:10px">▤</div><strong>Tu estantería está esperando nuevas historias</strong><p>Importa tus tomos y organízalos por serie y estante.</p></section></main>
@@ -1253,7 +1263,6 @@ async function handleMangaFileSelection(event) {
   }
 }
 $('#fileInput').addEventListener('change', handleMangaFileSelection);
-$('#fileInputHero').addEventListener('change', handleMangaFileSelection);
 window.addEventListener('error', event => {
   console.error('[TORII] error de interfaz', event.error || event.message);
   setStatus(`Error de TORII: ${event.message || 'revisa la consola'}`, null);
@@ -1400,4 +1409,38 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   navigator.serviceWorker.register('./sw.js').catch(console.warn);
 }
 render();
-</script></body></html>
+</script>
+<script>
+/* Frases breves de TORII: solo cambia el texto decorativo, sin guardar datos. */
+(() => {
+  const phrases = [
+    ["自分のペースで","A tu propio ritmo."],
+    ["物語の世界へ","Entra al mundo de las historias."],
+    ["一ページずつ","Una página a la vez."],
+    ["静かな時間","Un momento de calma."],
+    ["読書を楽しもう","Disfruta la lectura."],
+    ["新しい世界","Un mundo nuevo."],
+    ["続きが待っている","La historia te espera."],
+    ["心ゆくまで","Lee hasta quedar satisfecho."]
+  ];
+  const el = document.getElementById("toriiWhisper");
+  if (!el) return;
+  let current = -1;
+  const showPhrase = () => {
+    let next = Math.floor(Math.random() * phrases.length);
+    if (phrases.length > 1 && next === current) next = (next + 1) % phrases.length;
+    current = next;
+    el.classList.add("is-changing");
+    window.setTimeout(() => {
+      const [jp, translation] = phrases[current];
+      el.querySelector(".torii-whisper-jp").textContent = jp;
+      el.querySelector(".torii-whisper-translation").textContent = translation;
+      el.classList.remove("is-changing");
+    }, 260);
+  };
+  showPhrase();
+  window.setInterval(showPhrase, 18000);
+})();
+</script>
+
+</body></html>
