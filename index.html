@@ -158,6 +158,13 @@ button.primary{background:#aaa9ad;color:#101012}
 @media(max-width:600px){.reader .readbar{gap:4px}.reader .readbar button{padding:7px 9px;font-size:11px}.thumbnail-tray{bottom:58px;max-height:38%}}
 
 .continue-panel{display:flex;align-items:center;gap:20px;justify-content:space-between;padding:20px 22px;margin:18px 0;border:1px solid #34343a;border-radius:18px;background:linear-gradient(115deg,#1c1c20,#101012)}.continue-copy{flex:1;min-width:0}.continue-copy h2{margin:3px 0 5px;font-size:21px}.continue-copy p{margin:0 0 12px}.continue-copy .progressline{max-width:480px;margin:12px 0}.continue-cover{width:88px;height:112px;flex:0 0 88px;border-radius:9px;background:linear-gradient(145deg,#34343a,#111);display:grid;place-items:center;color:#aaa9ad;font:32px serif;border:1px solid #555}@media(max-width:560px){.continue-panel{padding:15px}.continue-cover{width:65px;height:86px;flex-basis:65px}.continue-copy h2{font-size:17px}}
+
+.reader-brightness{display:flex;align-items:center;gap:5px;flex:0 0 auto;color:#eee;font-size:16px;padding:0 5px}
+.reader-brightness input{width:76px;accent-color:#aaa9ad}
+.reader.bg-black .pagearea,.reader.bg-black .vertical-pages{background:#050506}
+.reader.bg-dark .pagearea,.reader.bg-dark .vertical-pages{background:#242428}
+.reader.bg-light .pagearea,.reader.bg-light .vertical-pages{background:#dedde0}
+.reader.bg-light .vertical-pages img{background:#dedde0}
 </style></head>
 <body>
 <aside class="sidebar"><div class="sidebar-brand"><img src="icon.svg" alt=""><div><strong>TORII</strong><small>La puerta a otros mundos</small></div></div><nav class="side-nav" aria-label="Navegación principal"><a href="#library" data-view="library" class="active"><span>▦</span> Biblioteca</a><a href="#shelfBar" data-view="shelves"><span>▤</span> Estantes</a><a href="#library" data-view="series"><span>▧</span> Series</a><a href="#library" data-view="reading"><span>◷</span> Lecturas</a><a href="#backup" data-view="downloads"><span>↓</span> Respaldos</a><a href="#settings" data-view="settings"><span>⚙</span> Ajustes</a></nav><div class="side-note">Un espacio personal para explorar historias.<br><span style="color:#eee">静かに読もう · Lee a tu ritmo.</span></div></aside><header class="top"><div class="brand"><img src="icon.svg" alt=""><span>TORII</span></div><div class="spacer"></div><input id="fileInput" class="file-picker-native" type="file" aria-label="Añadir tomo" accept=".cbr,.rar,.cbz,.zip,.jpg,.jpeg,.png,.webp,.gif,.bmp,image/*" multiple></header>
@@ -171,6 +178,8 @@ button.primary{background:#aaa9ad;color:#101012}
     <div class="spacer"></div>
     <button id="directionBtn" title="Cambiar sentido de lectura">RTL</button>
     <button id="fitBtn" title="Cambiar ajuste de página">Ajuste</button>
+    <button id="readerBgBtn" title="Cambiar fondo de lectura">Fondo: negro</button>
+    <label class="reader-brightness" title="Brillo de lectura">☼ <input id="readerBrightness" type="range" min="60" max="140" step="5" value="100" aria-label="Brillo de lectura"></label>
     <button id="zoomOutBtn" title="Reducir zoom">−</button>
     <button id="zoomResetBtn" title="Restablecer zoom">100%</button>
     <button id="zoomInBtn" title="Aumentar zoom">+</button>
@@ -892,6 +901,30 @@ function revealReaderControls() {
     if (reader.classList.contains('show')) reader.classList.add('controls-hidden');
   }, 3200);
 }
+const readerBgModes=['black','dark','light'];
+const readerBgLabels={black:'negro',dark:'gris',light:'claro'};
+let readerBg=localStorage.getItem('torii-reader-bg')||'black';
+let readerBrightness=Math.max(60,Math.min(140,Number(localStorage.getItem('torii-reader-brightness')||100)));
+function applyReaderAppearance(){
+  const reader=$('#reader');
+  reader.classList.remove('bg-black','bg-dark','bg-light');
+  reader.classList.add('bg-'+readerBg);
+  $('#readerBgBtn').textContent='Fondo: '+readerBgLabels[readerBg];
+  $('#readerBrightness').value=String(readerBrightness);
+  $('#pageArea').style.filter='brightness('+readerBrightness+'%)';
+  $('#verticalPages').style.filter='brightness('+readerBrightness+'%)';
+}
+$('#readerBgBtn').onclick=()=>{
+  readerBg=readerBgModes[(readerBgModes.indexOf(readerBg)+1)%readerBgModes.length];
+  localStorage.setItem('torii-reader-bg',readerBg);
+  applyReaderAppearance();revealReaderControls();
+};
+$('#readerBrightness').addEventListener('input',e=>{
+  readerBrightness=Number(e.target.value);
+  localStorage.setItem('torii-reader-brightness',String(readerBrightness));
+  applyReaderAppearance();revealReaderControls();
+});
+applyReaderAppearance();
 function setFitMode(mode) {
   fitMode = mode;
   const reader = $('#reader');
