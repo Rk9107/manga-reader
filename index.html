@@ -133,9 +133,13 @@ button.primary{background:#aaa9ad;color:#101012}
 .reader .readbar::-webkit-scrollbar{display:none}
 .reader .readbar button{white-space:nowrap;flex:0 0 auto}
 .reader .pagearea{overscroll-behavior:contain}
-.reader .pagearea img{transform-origin:center center;will-change:transform}
-.reader.zoomed .pagearea img{max-width:none;max-height:none;touch-action:none;cursor:grab}
+.reader .pagearea #pageImage{pointer-events:auto;touch-action:none;transform-origin:center center;will-change:transform;user-select:none;-webkit-user-drag:none}
+.reader.zoomed .pagearea #pageImage{max-width:none;max-height:none;cursor:grab}
 .reader.zoomed .page-zone{display:none}
+.reader.vertical-mode .pagearea{display:flex!important;flex:1 1 0;height:0;min-height:0;overflow:hidden!important;align-items:stretch;justify-content:stretch}
+.reader.vertical-mode .vertical-pages{display:flex!important;flex:1 1 auto;width:100%;height:100%;min-height:0;max-height:100%;overflow-y:scroll!important;overflow-x:hidden!important;overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch;align-items:center}
+.reader.vertical-mode .vertical-pages img{flex:0 0 auto;width:100%;height:auto;max-height:none;max-width:1100px;pointer-events:none;content-visibility:visible}
+.reader.vertical-mode #pageArea{touch-action:pan-y}
 .vertical-pages{width:100%;height:100%;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 0;overscroll-behavior:contain;touch-action:pan-y}
 .vertical-pages.hidden{display:none!important}
 .vertical-pages img{display:block;width:100%;height:auto;max-width:1100px;object-fit:contain;background:#111;content-visibility:auto}
