@@ -127,6 +127,31 @@ button.primary{background:#aaa9ad;color:#101012}
 .file-picker-native{display:block;width:100%;max-width:245px;min-height:46px;padding:5px 7px;border:1px solid #55545a;border-radius:12px;background:#19191c;color:#e7e7e9;font:13px system-ui,sans-serif;touch-action:manipulation;-webkit-tap-highlight-color:transparent;cursor:pointer}
 .file-picker-native::file-selector-button{min-height:34px;margin-right:8px;padding:7px 11px;border:0;border-radius:8px;background:#aaa9ad;color:#101012;font:700 13px system-ui,sans-serif;cursor:pointer}
 @media(max-width:560px){.top .file-picker-native{max-width:190px}.actions .file-picker-native{max-width:100%;flex:1}}
+
+/* TORII Reader 2.0 — Android-first controls */
+.reader .readbar{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+.reader .readbar::-webkit-scrollbar{display:none}
+.reader .readbar button{white-space:nowrap;flex:0 0 auto}
+.reader .pagearea{overscroll-behavior:contain}
+.reader .pagearea img{transform-origin:center center;will-change:transform}
+.reader.zoomed .pagearea img{max-width:none;max-height:none;touch-action:none;cursor:grab}
+.reader.zoomed .page-zone{display:none}
+.vertical-pages{width:100%;height:100%;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 0;overscroll-behavior:contain;touch-action:pan-y}
+.vertical-pages.hidden{display:none!important}
+.vertical-pages img{display:block;width:100%;height:auto;max-width:1100px;object-fit:contain;background:#111;content-visibility:auto}
+.reader.vertical-mode .pagearea{display:block;overflow:hidden}
+.reader.vertical-mode #pageImage,.reader.vertical-mode .page-zone{display:none!important}
+.reader.vertical-mode .vertical-pages{display:flex}
+.thumbnail-tray{position:absolute;z-index:6;left:0;right:0;bottom:64px;max-height:34%;padding:10px 12px calc(12px + env(safe-area-inset-bottom));background:rgba(13,13,16,.97);border-top:1px solid #444;backdrop-filter:blur(16px)}
+.thumbnail-tray.hidden{display:none!important}
+.thumbnail-head{display:flex;align-items:center;justify-content:space-between;padding:0 2px 8px;color:#eee;font-size:13px}
+.thumbnail-head button{background:#222;color:#eee;border:1px solid #444;padding:5px 10px}
+.thumbnail-list{display:flex;gap:9px;overflow-x:auto;overscroll-behavior-x:contain;padding:2px 2px 8px;scroll-snap-type:x mandatory}
+.thumbnail-item{flex:0 0 68px;display:grid;gap:4px;padding:4px;border:1px solid #444;border-radius:8px;background:#19191d;color:#ccc;scroll-snap-align:center;font-size:10px;text-align:center}
+.thumbnail-item.active{border:2px solid #c6c5c9;color:#fff;background:#303035}
+.thumbnail-item img{width:100%;height:86px;object-fit:contain;background:#080808;border-radius:4px}
+.thumbnail-item span{font-variant-numeric:tabular-nums}
+@media(max-width:600px){.reader .readbar{gap:4px}.reader .readbar button{padding:7px 9px;font-size:11px}.thumbnail-tray{bottom:58px;max-height:38%}}
 </style></head>
 <body>
 <aside class="sidebar"><div class="sidebar-brand"><img src="icon.svg" alt=""><div><strong>TORII</strong><small>La puerta a otros mundos</small></div></div><nav class="side-nav" aria-label="Navegación principal"><a href="#library" data-view="library" class="active"><span>▦</span> Biblioteca</a><a href="#shelfBar" data-view="shelves"><span>▤</span> Estantes</a><a href="#library" data-view="series"><span>▧</span> Series</a><a href="#library" data-view="reading"><span>◷</span> Lecturas</a><a href="#backup" data-view="downloads"><span>↓</span> Respaldos</a><a href="#settings" data-view="settings"><span>⚙</span> Ajustes</a></nav><div class="side-note">Un espacio personal para explorar historias.<br><span style="color:#eee">静かに読もう · Lee a tu ritmo.</span></div></aside><header class="top"><div class="brand"><img src="icon.svg" alt=""><span>TORII</span></div><div class="spacer"></div><input id="fileInput" class="file-picker-native" type="file" aria-label="Añadir tomo" accept=".cbr,.rar,.cbz,.zip,.jpg,.jpeg,.png,.webp,.gif,.bmp,image/*" multiple></header>
@@ -139,13 +164,20 @@ button.primary{background:#aaa9ad;color:#101012}
     <div class="spacer"></div>
     <button id="directionBtn" title="Cambiar sentido de lectura">RTL</button>
     <button id="fitBtn" title="Cambiar ajuste de página">Ajuste</button>
+    <button id="pagesBtn" title="Mostrar miniaturas">Páginas</button>
+    <button id="verticalBtn" title="Cambiar modo de lectura">Vertical</button>
     <button id="fullscreenBtn" title="Pantalla completa">⛶</button>
   </div>
   <div class="pagearea" id="pageArea">
     <button class="page-zone page-zone-prev" id="tapPrev" aria-label="Página anterior"></button>
     <img id="pageImage" alt="Página del manga" draggable="false">
+    <div id="verticalPages" class="vertical-pages hidden" aria-label="Páginas en desplazamiento vertical"></div>
     <button class="page-zone page-zone-next" id="tapNext" aria-label="Página siguiente"></button>
     <div class="reader-loading hidden" id="readerLoading">Cargando página…</div>
+  </div>
+  <div id="thumbnailTray" class="thumbnail-tray hidden" aria-label="Miniaturas de páginas">
+    <div class="thumbnail-head"><strong>Ir a página</strong><button id="closeThumbnails" aria-label="Cerrar miniaturas">✕</button></div>
+    <div id="thumbnailList" class="thumbnail-list"></div>
   </div>
   <div class="readfoot" id="readerFoot">
     <button id="prev" aria-label="Página anterior">‹</button>
@@ -421,6 +453,7 @@ async function removeBook(bookId) {
       $('#reader').classList.remove('show');
       active = null;
       if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
+  clearThumbnailUrls(); verticalUrls.forEach(URL.revokeObjectURL); verticalUrls=[]; $('#thumbnailTray').classList.add('hidden'); $('#verticalPages').replaceChildren();
       currentObjectUrl = null;
     }
     saveLibrary();
@@ -686,6 +719,79 @@ async function getBookRefs(book) {
   return Array.isArray(refs) ? refs : [];
 }
 
+
+let readerVertical = false;
+let verticalObserver = null;
+let verticalUrls = [];
+let thumbnailUrls = [];
+let zoomScale = 1, zoomX = 0, zoomY = 0, pinchStart = 0, pinchScale = 1, lastTapAt = 0;
+let activePointers = new Map();
+function resetZoom(){zoomScale=1;zoomX=0;zoomY=0;applyZoom();}
+function applyZoom(){
+  const img=$('#pageImage');
+  img.style.transform=`translate(${zoomX}px,${zoomY}px) scale(${zoomScale})`;
+  $('#reader').classList.toggle('zoomed',zoomScale>1.01);
+}
+function ensureVerticalPages(refs){
+  const host=$('#verticalPages');
+  if(host.children.length===refs.length) return Promise.resolve();
+  host.replaceChildren();
+  verticalUrls.forEach(URL.revokeObjectURL); verticalUrls=[];
+  const tasks=refs.map(async(ref,i)=>{
+    const img=document.createElement('img');
+    img.alt=`Página ${i+1}`; img.loading='lazy'; img.decoding='async';
+    img.dataset.page=String(i);
+    if(ref.legacyData) img.src=ref.legacyData;
+    else {const blob=await idbGet('pageBlobs',ref.key);if(!blob)throw new Error(`No se encontró la página ${i+1}.`);const url=URL.createObjectURL(blob);verticalUrls.push(url);img.src=url;}
+    img.addEventListener('load',()=>{if(readerVertical && img.getBoundingClientRect().top < innerHeight*.7){page=i;updateReaderProgress(refs.length);active.last=i+1;localStorage.setItem(libraryKey,JSON.stringify(books));updateThumbnailSelection();}},{passive:true});
+    host.append(img);
+  });
+  return Promise.all(tasks);
+}
+function clearThumbnailUrls(){thumbnailUrls.forEach(URL.revokeObjectURL);thumbnailUrls=[];}
+async function openThumbnails(){
+  if(!active)return;
+  const refs=await getBookRefs(active), list=$('#thumbnailList');
+  list.replaceChildren(); clearThumbnailUrls();
+  $('#thumbnailTray').classList.remove('hidden');
+  for(let i=0;i<refs.length;i++){
+    const item=document.createElement('button');item.type='button';item.className='thumbnail-item';item.dataset.page=String(i);
+    const img=document.createElement('img');img.alt='';img.loading='lazy';
+    if(refs[i].legacyData)img.src=refs[i].legacyData;
+    else{const blob=await idbGet('pageBlobs',refs[i].key);if(blob){const url=URL.createObjectURL(blob);thumbnailUrls.push(url);img.src=url;}}
+    const label=document.createElement('span');label.textContent=String(i+1);
+    item.append(img,label);item.addEventListener('click',()=>{page=i;$('#thumbnailTray').classList.add('hidden');if(readerVertical){const target=$('#verticalPages').children[i];target?.scrollIntoView({behavior:'smooth',block:'start'});updateReaderProgress(refs.length);active.last=i+1;localStorage.setItem(libraryKey,JSON.stringify(books));}else showPage();revealReaderControls();});
+    list.append(item);
+  }
+  updateThumbnailSelection();
+  list.querySelector('.active')?.scrollIntoView({block:'nearest',inline:'center'});
+}
+function updateThumbnailSelection(){
+  const list=$('#thumbnailList');if(!list)return;
+  list.querySelectorAll('.thumbnail-item').forEach((item,i)=>{item.classList.toggle('active',i===page);if(i===page && !$('#thumbnailTray').classList.contains('hidden'))item.scrollIntoView({block:'nearest',inline:'center'});});
+}
+function setVerticalMode(enabled){
+  readerVertical=enabled;$('#reader').classList.toggle('vertical-mode',enabled);
+  $('#verticalBtn').textContent=enabled?'Página':'Vertical';
+  $('#verticalBtn').title=enabled?'Volver a página individual':'Activar desplazamiento vertical';
+  $('#pageArea').scrollTop=0;
+  if(enabled)showPage();else showPage();
+}
+$('#pagesBtn').onclick=()=>{if($('#thumbnailTray').classList.contains('hidden'))openThumbnails();else $('#thumbnailTray').classList.add('hidden');revealReaderControls();};
+$('#closeThumbnails').onclick=()=>$('#thumbnailTray').classList.add('hidden');
+$('#verticalBtn').onclick=()=>{setVerticalMode(!readerVertical);revealReaderControls();};
+$('#pageImage').addEventListener('touchstart',e=>{
+  if(e.touches.length===2){pinchStart=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);pinchScale=zoomScale;}
+  else if(e.touches.length===1)lastTapAt=Date.now();
+},{passive:true});
+$('#pageImage').addEventListener('touchmove',e=>{
+  if(e.touches.length===2 && pinchStart){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);zoomScale=Math.max(1,Math.min(4,pinchScale*d/pinchStart));applyZoom();e.preventDefault();}
+},{passive:false});
+$('#pageImage').addEventListener('touchend',e=>{
+  if(e.touches.length<2)pinchStart=0;
+  if(e.changedTouches.length===1 && Date.now()-lastTapAt<280){zoomScale=zoomScale>1.05?1:2.2;applyZoom();}
+},{passive:true});
+
 let readerControlsTimer = null;
 let fitMode = 'contain';
 let seekChanging = false;
@@ -738,6 +844,8 @@ async function openBook(id) {
   $('#readerTitle').textContent = active.title;
   $('#readerSubtitle').textContent = active.author ? active.author + ' · TORII' : 'Lectura inmersiva · TORII';
   $('#reader').classList.add('show');
+  $('#thumbnailTray').classList.add('hidden');
+  resetZoom();
   $('#reader').classList.remove('controls-hidden');
   setFitMode(fitMode);
   revealReaderControls();
@@ -748,25 +856,29 @@ async function showPage() {
   const refs = await getBookRefs(active);
   if (!refs.length) return;
   page = Math.max(0, Math.min(page, refs.length - 1));
-  const ref = refs[page];
   $('#readerLoading').classList.remove('hidden');
-  if (currentObjectUrl) {
-    URL.revokeObjectURL(currentObjectUrl);
-    currentObjectUrl = null;
-  }
   try {
-    if (ref.legacyData) {
-      $('#pageImage').src = ref.legacyData;
+    if (readerVertical) {
+      await ensureVerticalPages(refs);
+      const target = $('#verticalPages').children[page];
+      if (target) target.scrollIntoView({block:'start',behavior:'auto'});
     } else {
-      const blob = await idbGet('pageBlobs', ref.key);
-      if (!blob) throw new Error('No se encontró esta página en el almacenamiento local.');
-      currentObjectUrl = URL.createObjectURL(blob);
-      $('#pageImage').src = currentObjectUrl;
+      const ref = refs[page];
+      if (currentObjectUrl) { URL.revokeObjectURL(currentObjectUrl); currentObjectUrl = null; }
+      if (ref.legacyData) $('#pageImage').src = ref.legacyData;
+      else {
+        const blob = await idbGet('pageBlobs', ref.key);
+        if (!blob) throw new Error('No se encontró esta página en el almacenamiento local.');
+        currentObjectUrl = URL.createObjectURL(blob);
+        $('#pageImage').src = currentObjectUrl;
+      }
+      $('#pageImage').alt = `${active.title}, página ${page + 1}`;
+      resetZoom();
     }
-    $('#pageImage').alt = `${active.title}, página ${page + 1}`;
     updateReaderProgress(refs.length);
     active.last = page + 1;
     localStorage.setItem(libraryKey, JSON.stringify(books));
+    updateThumbnailSelection();
   } catch (error) {
     alert(error.message || 'No se pudo cargar la página.');
   } finally {
