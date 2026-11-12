@@ -1,7 +1,7 @@
-/* Yomibako — Service Worker
+/* TORII — Service Worker
    Compatible con GitHub Pages en /manga-reader/
 */
-const CACHE_NAME = "yomibako-shell-v9";
+const CACHE_NAME = "torii-shell-v9";
 
 const APP_SHELL = [
   "./",
@@ -25,7 +25,7 @@ self.addEventListener("activate", (event) => {
       .then((keys) =>
         Promise.all(
           keys
-            .filter((key) => key.startsWith("yomibako-shell-") && key !== CACHE_NAME)
+            .filter((key) => key.startsWith("torii-shell-") && key !== CACHE_NAME)
             .map((key) => caches.delete(key))
         )
       )
