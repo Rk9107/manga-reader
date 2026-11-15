@@ -648,6 +648,14 @@ function setStatus(message, percent = null) {
   value.textContent = percent === null ? '' : `${percent}%`;
   row.append(label, value);
   box.append(row);
+  if (pdfImportControl) {
+    const cancel = document.createElement('button');
+    cancel.type = 'button';
+    cancel.textContent = 'Cancelar';
+    cancel.style.cssText = 'margin-top:10px;padding:7px 12px;border:1px solid #777;border-radius:8px;background:#303036;color:#fff';
+    cancel.onclick = () => { pdfImportControl.cancelled = true; cancel.disabled = true; cancel.textContent = 'Cancelando…'; };
+    box.append(cancel);
+  }
   if (percent !== null) {
     const line = document.createElement('div');
     line.style.cssText = 'height:6px;background:#45454b;border-radius:99px;overflow:hidden;margin-top:9px';
@@ -677,21 +685,29 @@ async function saveBookRefs(bookId, refs) {
 }
 
 let pdfEnginePromise;
+let pdfImportControl = null;
+const pdfCheckpointKey = 'torii-pdf-import-checkpoint-v1';
+
 async function getPdfEngine() {
   if (!pdfEnginePromise) {
     pdfEnginePromise = new Promise((resolve, reject) => {
       if (window.pdfjsLib) { resolve(window.pdfjsLib); return; }
       const tag = document.createElement('script');
       tag.src = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js';
-      tag.onload = () => {
-        if (!window.pdfjsLib) { reject(new Error('No se pudo inicializar PDF.js.')); return; }
-        resolve(window.pdfjsLib);
-      };
+      tag.onload = () => window.pdfjsLib ? resolve(window.pdfjsLib) : reject(new Error('No se pudo inicializar PDF.js.'));
       tag.onerror = () => reject(new Error('No se pudo cargar el motor PDF.'));
       document.head.append(tag);
     }).catch(error => { pdfEnginePromise = null; throw error; });
   }
   return pdfEnginePromise;
+}
+
+function readPdfCheckpoint(file) {
+  try {
+    const saved = JSON.parse(localStorage.getItem(pdfCheckpointKey) || 'null');
+    if (saved && saved.name === file.name && saved.size === file.size && saved.lastModified === file.lastModified) return saved;
+  } catch (error) { console.warn('[TORII] No se pudo leer el punto de recuperación PDF:', error); }
+  return null;
 }
 
 async function importPdf(file, bookId) {
@@ -701,12 +717,21 @@ async function importPdf(file, bookId) {
   const data = new Uint8Array(await file.arrayBuffer());
   const pdf = await pdfjs.getDocument({ data }).promise;
   if (!pdf.numPages) throw new Error('El PDF no contiene páginas.');
-  const refs = [];
-  const maxDimension = 1600;
 
-  // Evita que Android apague la pantalla y suspenda una conversión larga.
+  const saved = readPdfCheckpoint(file);
+  const checkpoint = saved || {
+    name: file.name, size: file.size, lastModified: file.lastModified,
+    bookId, nextPage: 1, refs: [], failedPages: []
+  };
+  const refs = Array.isArray(checkpoint.refs) ? checkpoint.refs : [];
+  const failedPages = Array.isArray(checkpoint.failedPages) ? checkpoint.failedPages : [];
+  checkpoint.bookId = checkpoint.bookId || bookId;
+  checkpoint.nextPage = Math.max(1, Number(checkpoint.nextPage) || 1);
+  localStorage.setItem(pdfCheckpointKey, JSON.stringify(checkpoint));
+
   let keepAwake = true;
   let screenLock = null;
+  pdfImportControl = { cancelled: false };
   const acquireScreenLock = async () => {
     if (!keepAwake || !('wakeLock' in navigator) || document.visibilityState !== 'visible' || screenLock) return;
     try {
@@ -715,53 +740,70 @@ async function importPdf(file, bookId) {
         screenLock = null;
         if (keepAwake && document.visibilityState === 'visible') acquireScreenLock();
       }, { once: true });
-    } catch (error) {
-      console.warn('[TORII] No se pudo mantener la pantalla activa:', error);
-    }
+    } catch (error) { console.warn('[TORII] No se pudo mantener la pantalla activa:', error); }
   };
-  const onVisibilityChange = () => {
-    if (document.visibilityState === 'visible') acquireScreenLock();
-  };
+  const onVisibilityChange = () => { if (document.visibilityState === 'visible') acquireScreenLock(); };
   document.addEventListener('visibilitychange', onVisibilityChange);
   await acquireScreenLock();
 
   try {
-    for (let i = 1; i <= pdf.numPages; i++) {
-      setStatus(`Convirtiendo PDF: página ${i} de ${pdf.numPages}…`, Math.round(((i - 1) / pdf.numPages) * 100));
-      const page = await pdf.getPage(i);
-      const base = page.getViewport({ scale: 1 });
-      const scale = Math.min(1.6, maxDimension / Math.max(base.width, base.height));
-      const viewport = page.getViewport({ scale });
-      const canvas = document.createElement('canvas');
-      canvas.width = Math.max(1, Math.ceil(viewport.width));
-      canvas.height = Math.max(1, Math.ceil(viewport.height));
-      const context = canvas.getContext('2d', { alpha: false });
-      if (!context) throw new Error('No se pudo preparar el lienzo para convertir el PDF.');
-      context.fillStyle = '#ffffff';
-      context.fillRect(0, 0, canvas.width, canvas.height);
-      await page.render({ canvasContext: context, viewport }).promise;
-      const blob = await new Promise((resolve, reject) => {
-        canvas.toBlob(result => result ? resolve(result) : reject(new Error(`No se pudo convertir la página ${i} del PDF.`)), 'image/jpeg', 0.88);
-      });
-      refs.push(await saveImportedPage(bookId, `pagina-${String(i).padStart(4, '0')}.jpg`, blob, i - 1));
-      page.cleanup();
-      canvas.width = 0;
-      canvas.height = 0;
-      setStatus(`Guardando PDF: página ${i} de ${pdf.numPages}…`, Math.round((i / pdf.numPages) * 100));
-      // Cede el hilo entre páginas para que la interfaz y el navegador sigan respondiendo.
+    const batchSize = 5;
+    for (let i = checkpoint.nextPage; i <= pdf.numPages; i++) {
+      if (pdfImportControl.cancelled) {
+        const cancelled = new Error('Importación pausada. Selecciona el mismo archivo para continuar desde la última página guardada.');
+        cancelled.name = 'AbortError';
+        throw cancelled;
+      }
+      const batch = Math.floor((i - 1) / batchSize) + 1;
+      const totalBatches = Math.ceil(pdf.numPages / batchSize);
+      setStatus(`PDF · lote ${batch}/${totalBatches} · página ${i} de ${pdf.numPages}…`, Math.round(((i - 1) / pdf.numPages) * 100));
+      let page = null, canvas = null;
+      try {
+        page = await pdf.getPage(i);
+        const base = page.getViewport({ scale: 1 });
+        const scale = Math.min(1.6, 1600 / Math.max(base.width, base.height));
+        const viewport = page.getViewport({ scale });
+        canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.ceil(viewport.width));
+        canvas.height = Math.max(1, Math.ceil(viewport.height));
+        const context = canvas.getContext('2d', { alpha: false });
+        if (!context) throw new Error('No se pudo preparar el lienzo.');
+        context.fillStyle = '#ffffff';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        await page.render({ canvasContext: context, viewport }).promise;
+        const blob = await new Promise((resolve, reject) => {
+          canvas.toBlob(result => result ? resolve(result) : reject(new Error('No se pudo generar la imagen.')), 'image/jpeg', 0.88);
+        });
+        const ref = await saveImportedPage(checkpoint.bookId, `pagina-${String(i).padStart(4, '0')}.jpg`, blob, i - 1);
+        refs[i - 1] = ref;
+      } catch (pageError) {
+        console.warn(`[TORII] Se omitió la página PDF ${i}:`, pageError);
+        failedPages.push(i);
+      } finally {
+        if (page) page.cleanup();
+        if (canvas) { canvas.width = 0; canvas.height = 0; }
+      }
+      checkpoint.refs = refs;
+      checkpoint.failedPages = failedPages;
+      checkpoint.nextPage = i + 1;
+      // Punto de recuperación persistente tras cada página guardada u omitida.
+      localStorage.setItem(pdfCheckpointKey, JSON.stringify(checkpoint));
+      setStatus(`PDF · página ${i} de ${pdf.numPages} guardada…`, Math.round((i / pdf.numPages) * 100));
       await new Promise(resolve => setTimeout(resolve, 0));
     }
   } finally {
     keepAwake = false;
     document.removeEventListener('visibilitychange', onVisibilityChange);
-    if (screenLock) {
-      try { await screenLock.release(); } catch (error) { console.warn('[TORII] No se pudo liberar la pantalla activa:', error); }
-      screenLock = null;
-    }
+    if (screenLock) { try { await screenLock.release(); } catch (error) { console.warn(error); } screenLock = null; }
+    pdfImportControl = null;
     await pdf.destroy();
   }
-  return refs;
+  const completedRefs = refs.filter(Boolean);
+  if (!completedRefs.length) throw new Error('No se pudo convertir ninguna página del PDF.');
+  completedRefs.failedPages = failedPages.slice();
+  return completedRefs;
 }
+
 async function importZip(file, bookId) {
   setStatus(`Abriendo ZIP: ${file.name}…`, 0);
   if (!window.JSZip) {
@@ -860,12 +902,10 @@ async function importRar(file, bookId) {
 
 async function importFiles(selected) {
   for (const file of selected) {
-    const bookId = crypto.randomUUID();
+    let bookId = crypto.randomUUID();
+    let isPdfFile = false;
     try {
       let refs = [];
-      // Algunos archivos .cbr son en realidad contenedores ZIP renombrados.
-      // Detectar el formato por la firma binaria evita enviarlos al motor RAR.
-      // Detecta el contenido real para admitir PDF aunque venga renombrado como .cbr.
       const signature = new Uint8Array(await file.slice(0, 1024).arrayBuffer());
       const signatureText = new TextDecoder().decode(signature);
       const isPdfContainer = signatureText.includes('%PDF-');
@@ -876,7 +916,10 @@ async function importFiles(selected) {
       const isRarContainer =
         signature[0] === 0x52 && signature[1] === 0x61 &&
         signature[2] === 0x72 && signature[3] === 0x21;
-      if (isPdfContainer || /\.pdf$/i.test(file.name) || file.type === 'application/pdf') {
+      isPdfFile = isPdfContainer || /\.pdf$/i.test(file.name) || file.type === 'application/pdf';
+      if (isPdfFile) {
+        const checkpoint = readPdfCheckpoint(file);
+        if (checkpoint?.bookId) bookId = checkpoint.bookId;
         refs = await importPdf(file, bookId);
       } else if (/\.(cbz|zip)$/i.test(file.name) || isZipContainer) {
         refs = await importZip(file, bookId);
@@ -885,10 +928,11 @@ async function importFiles(selected) {
       } else if (file.type.startsWith('image/')) {
         refs = [await saveImportedPage(bookId, file.name, file, 0)];
       } else {
-        throw new Error('Formato no compatible. Usa CBR, CBZ o imágenes.');
+        throw new Error('Formato no compatible. Usa CBR, CBZ, PDF o imágenes.');
       }
 
       await saveBookRefs(bookId, refs);
+      const failedPages = refs.failedPages || [];
       books.push({
         id: bookId,
         title: bookTitle(file.name),
@@ -899,35 +943,41 @@ async function importFiles(selected) {
         status: 'reading',
         author: '',
         genre: '',
-        notes: '',
+        notes: failedPages.length ? `PDF: no se pudieron convertir las páginas ${failedPages.join(', ')}.` : '',
         favorite: false,
         created: Date.now()
       });
       saveLibrary();
       render();
-      setStatus(`¡${file.name} se importó correctamente!`, 100);
+      if (isPdfFile) localStorage.removeItem(pdfCheckpointKey);
+      setStatus(failedPages.length
+        ? `¡${file.name} se importó con ${failedPages.length} página(s) omitida(s)!`
+        : `¡${file.name} se importó correctamente!`, 100);
     } catch (error) {
       console.error(error);
-      setStatus(`No pude abrir ${file.name}: ${error.message || error}`, null);
-      alert(`No pude abrir ${file.name}: ${error.message || error}`);
-      // Elimina páginas parciales de una importación fallida.
-      try {
-        const database = await db();
-        const tx = database.transaction('pageBlobs', 'readwrite');
-        const store = tx.objectStore('pageBlobs');
-        const cursorRequest = store.openCursor();
-        cursorRequest.onsuccess = () => {
-          const cursor = cursorRequest.result;
-          if (!cursor) return;
-          if (String(cursor.key).startsWith(`${bookId}::`)) cursor.delete();
-          cursor.continue();
-        };
-      } catch (cleanupError) {
-        console.warn(cleanupError);
+      if (isPdfFile && error.name === 'AbortError') {
+        setStatus(error.message, null);
+      } else {
+        setStatus(`No pude abrir ${file.name}: ${error.message || error}`, null);
+        alert(`No pude abrir ${file.name}: ${error.message || error}`);
+      }
+      // Las páginas PDF parciales se conservan para poder reanudar al seleccionar el mismo archivo.
+      if (!isPdfFile) {
+        try {
+          const database = await db();
+          const tx = database.transaction('pageBlobs', 'readwrite');
+          const store = tx.objectStore('pageBlobs');
+          const cursorRequest = store.openCursor();
+          cursorRequest.onsuccess = () => {
+            const cursor = cursorRequest.result;
+            if (!cursor) return;
+            if (String(cursor.key).startsWith(`${bookId}::`)) cursor.delete();
+            cursor.continue();
+          };
+        } catch (cleanupError) { console.warn(cleanupError); }
       }
     }
   }
-  // Mantener el resultado visible en Android hasta la siguiente acción del usuario.
 }
 
 async function getBookRefs(book) {
