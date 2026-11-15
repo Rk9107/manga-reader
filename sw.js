@@ -1,7 +1,7 @@
 /* TORII — Service Worker
    Compatible con GitHub Pages en /manga-reader/
 */
-const CACHE_NAME = "torii-shell-v46-japanese-library";
+const CACHE_NAME = "torii-shell-v47-sakura-library";
 
 const APP_SHELL = [
   "./",
