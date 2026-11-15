@@ -527,8 +527,8 @@ function render() {
   const grid = $('#library');
   grid.innerHTML = '';
   $('#backToShelves').classList.toggle('hidden', !activeSeries);
-  $('#collectionHeading').textContent = activeSeries || (activeShelf === 'Todos' ? 'Mis estantes' : activeShelf);
-  $('#collectionSub').textContent = activeSeries ? 'Tomos de esta serie · abre cualquiera para continuar leyendo.' : 'Cada serie aparece una sola vez. Entra para ver sus tomos.';
+  $('#collectionHeading').textContent = activeSeries || (activeShelf === 'Todos' ? 'Mi colección' : activeShelf);
+  $('#collectionSub').textContent = activeSeries ? 'Tomos de esta serie · abre cualquiera para continuar leyendo.' : 'Tus series aparecen aquí con sus portadas. Entra para ver los tomos.';
   $('#deleteSeriesBtn').classList.toggle('hidden', !activeSeries);
   $('#count').textContent = activeSeries ? visibleBooks.length + ' tomos' : '';
   $('#empty').classList.toggle('hidden', books.length > 0);
