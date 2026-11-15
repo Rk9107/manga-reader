@@ -711,32 +711,26 @@ function readPdfCheckpoint(file) {
 }
 
 async function importPdf(file, bookId) {
-  setStatus(\`Preparando PDF: \${file.name}…\`, 0);
+  setStatus(`Preparando PDF: ${file.name}…`, 0);
   const pdfjs = await getPdfEngine();
   pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
-
-  // Leer el archivo una sola vez; PDF.js trabaja sobre los bytes locales.
   const data = new Uint8Array(await file.arrayBuffer());
-  const pdf = await pdfjs.getDocument({ data, isEvalSupported: false }).promise;
-  if (!pdf.numPages) {
-    await pdf.destroy();
-    throw new Error('El PDF no contiene páginas.');
-  }
+  const pdf = await pdfjs.getDocument({ data }).promise;
+  if (!pdf.numPages) throw new Error('El PDF no contiene páginas.');
 
   const saved = readPdfCheckpoint(file);
   const checkpoint = saved || {
     name: file.name, size: file.size, lastModified: file.lastModified,
     bookId, nextPage: 1, refs: [], failedPages: []
   };
+  const refs = Array.isArray(checkpoint.refs) ? checkpoint.refs : [];
+  const failedPages = Array.isArray(checkpoint.failedPages) ? checkpoint.failedPages : [];
   checkpoint.bookId = checkpoint.bookId || bookId;
   checkpoint.nextPage = Math.max(1, Number(checkpoint.nextPage) || 1);
-  const refs = Array.isArray(checkpoint.refs) ? checkpoint.refs : [];
-  const failedPages = [...new Set(Array.isArray(checkpoint.failedPages) ? checkpoint.failedPages : [])];
   localStorage.setItem(pdfCheckpointKey, JSON.stringify(checkpoint));
 
-  // Evita que el sistema apague la pantalla durante el procesamiento.
-  let screenLock = null;
   let keepAwake = true;
+  let screenLock = null;
   pdfImportControl = { cancelled: false };
   const acquireScreenLock = async () => {
     if (!keepAwake || !('wakeLock' in navigator) || document.visibilityState !== 'visible' || screenLock) return;
@@ -746,121 +740,70 @@ async function importPdf(file, bookId) {
         screenLock = null;
         if (keepAwake && document.visibilityState === 'visible') acquireScreenLock();
       }, { once: true });
-    } catch (error) {
-      console.warn('[TORII] No se pudo mantener la pantalla activa:', error);
-    }
+    } catch (error) { console.warn('[TORII] No se pudo mantener la pantalla activa:', error); }
   };
-  const onVisibilityChange = () => {
-    if (document.visibilityState === 'visible') acquireScreenLock();
-  };
+  const onVisibilityChange = () => { if (document.visibilityState === 'visible') acquireScreenLock(); };
   document.addEventListener('visibilitychange', onVisibilityChange);
   await acquireScreenLock();
 
-  // Cede tiempo al navegador entre páginas/lotes. No necesita mantener pulsada
-  // la pantalla y permite que se actualicen el contador y el botón Cancelar.
-  const yieldToBrowser = () => new Promise(resolve => setTimeout(resolve, 0));
-  const batchSize = 5;
-
   try {
-    const totalBatches = Math.ceil(pdf.numPages / batchSize);
-    let completed = Math.min(pdf.numPages, checkpoint.nextPage - 1);
-
-    for (let batchStart = checkpoint.nextPage; batchStart <= pdf.numPages; batchStart += batchSize) {
-      if (pdfImportControl?.cancelled) {
-        const paused = new Error('Conversión pausada. Selecciona el mismo PDF para reanudar desde la última página guardada.');
-        paused.name = 'AbortError';
-        throw paused;
+    const batchSize = 5;
+    for (let i = checkpoint.nextPage; i <= pdf.numPages; i++) {
+      if (pdfImportControl.cancelled) {
+        const cancelled = new Error('Importación pausada. Selecciona el mismo archivo para continuar desde la última página guardada.');
+        cancelled.name = 'AbortError';
+        throw cancelled;
       }
-
-      const batchEnd = Math.min(pdf.numPages, batchStart + batchSize - 1);
-      const batchNumber = Math.floor((batchStart - 1) / batchSize) + 1;
-      setStatus(\`PDF · lote \${batchNumber}/\${totalBatches} · preparando páginas \${batchStart}–\${batchEnd}…\`, Math.round((completed / pdf.numPages) * 100));
-
-      for (let i = batchStart; i <= batchEnd; i++) {
-        if (pdfImportControl?.cancelled) {
-          const paused = new Error('Conversión pausada. Selecciona el mismo PDF para reanudar desde la última página guardada.');
-          paused.name = 'AbortError';
-          throw paused;
-        }
-
-        let page = null;
-        let canvas = null;
-        try {
-          page = await pdf.getPage(i);
-          const base = page.getViewport({ scale: 1 });
-          const scale = Math.min(1.6, 1600 / Math.max(base.width, base.height));
-          const viewport = page.getViewport({ scale });
-          canvas = document.createElement('canvas');
-          canvas.width = Math.max(1, Math.ceil(viewport.width));
-          canvas.height = Math.max(1, Math.ceil(viewport.height));
-          const context = canvas.getContext('2d', { alpha: false });
-          if (!context) throw new Error('No se pudo preparar el lienzo.');
-          context.fillStyle = '#ffffff';
-          context.fillRect(0, 0, canvas.width, canvas.height);
-          await page.render({ canvasContext: context, viewport }).promise;
-
-          const blob = await new Promise((resolve, reject) => {
-            canvas.toBlob(result => result
-              ? resolve(result)
-              : reject(new Error('No se pudo generar la imagen de esta página.')),
-            'image/jpeg', 0.88);
-          });
-          const ref = await saveImportedPage(
-            checkpoint.bookId,
-            \`pagina-\${String(i).padStart(4, '0')}.jpg\`,
-            blob,
-            i - 1
-          );
-          refs[i - 1] = ref;
-          const failedIndex = failedPages.indexOf(i);
-          if (failedIndex !== -1) failedPages.splice(failedIndex, 1);
-        } catch (pageError) {
-          console.warn(\`[TORII] Se omitió la página PDF \${i}:\`, pageError);
-          refs[i - 1] = null;
-          if (!failedPages.includes(i)) failedPages.push(i);
-        } finally {
-          if (page) page.cleanup();
-          if (canvas) {
-            canvas.width = 0;
-            canvas.height = 0;
-          }
-        }
-
-        completed = i;
-        checkpoint.refs = refs;
-        checkpoint.failedPages = failedPages;
-        checkpoint.nextPage = i + 1;
-
-        // Guardado de punto de recuperación después de cada página.
-        localStorage.setItem(pdfCheckpointKey, JSON.stringify(checkpoint));
-        setStatus(
-          \`PDF · lote \${batchNumber}/\${totalBatches} · página \${i} de \${pdf.numPages} guardada\`,
-          Math.round((completed / pdf.numPages) * 100)
-        );
-        await yieldToBrowser();
+      const batch = Math.floor((i - 1) / batchSize) + 1;
+      const totalBatches = Math.ceil(pdf.numPages / batchSize);
+      setStatus(`PDF · lote ${batch}/${totalBatches} · página ${i} de ${pdf.numPages}…`, Math.round(((i - 1) / pdf.numPages) * 100));
+      let page = null, canvas = null;
+      try {
+        page = await pdf.getPage(i);
+        const base = page.getViewport({ scale: 1 });
+        const scale = Math.min(1.6, 1600 / Math.max(base.width, base.height));
+        const viewport = page.getViewport({ scale });
+        canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.ceil(viewport.width));
+        canvas.height = Math.max(1, Math.ceil(viewport.height));
+        const context = canvas.getContext('2d', { alpha: false });
+        if (!context) throw new Error('No se pudo preparar el lienzo.');
+        context.fillStyle = '#ffffff';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        await page.render({ canvasContext: context, viewport }).promise;
+        const blob = await new Promise((resolve, reject) => {
+          canvas.toBlob(result => result ? resolve(result) : reject(new Error('No se pudo generar la imagen.')), 'image/jpeg', 0.88);
+        });
+        const ref = await saveImportedPage(checkpoint.bookId, `pagina-${String(i).padStart(4, '0')}.jpg`, blob, i - 1);
+        refs[i - 1] = ref;
+      } catch (pageError) {
+        console.warn(`[TORII] Se omitió la página PDF ${i}:`, pageError);
+        failedPages.push(i);
+      } finally {
+        if (page) page.cleanup();
+        if (canvas) { canvas.width = 0; canvas.height = 0; }
       }
-
-      // Pausa corta entre lotes para refrescar la interfaz y responder a Cancelar.
-      await new Promise(resolve => setTimeout(resolve, 35));
+      checkpoint.refs = refs;
+      checkpoint.failedPages = failedPages;
+      checkpoint.nextPage = i + 1;
+      // Punto de recuperación persistente tras cada página guardada u omitida.
+      localStorage.setItem(pdfCheckpointKey, JSON.stringify(checkpoint));
+      setStatus(`PDF · página ${i} de ${pdf.numPages} guardada…`, Math.round((i / pdf.numPages) * 100));
+      await new Promise(resolve => setTimeout(resolve, 0));
     }
   } finally {
     keepAwake = false;
     document.removeEventListener('visibilitychange', onVisibilityChange);
-    if (screenLock) {
-      try { await screenLock.release(); }
-      catch (error) { console.warn('[TORII] No se pudo liberar Wake Lock:', error); }
-      screenLock = null;
-    }
+    if (screenLock) { try { await screenLock.release(); } catch (error) { console.warn(error); } screenLock = null; }
     pdfImportControl = null;
-    try { await pdf.destroy(); }
-    catch (error) { console.warn('[TORII] Error al cerrar PDF.js:', error); }
+    await pdf.destroy();
   }
-
   const completedRefs = refs.filter(Boolean);
   if (!completedRefs.length) throw new Error('No se pudo convertir ninguna página del PDF.');
-  completedRefs.failedPages = failedPages.slice().sort((a, b) => a - b);
+  completedRefs.failedPages = failedPages.slice();
   return completedRefs;
 }
+
 async function importZip(file, bookId) {
   setStatus(`Abriendo ZIP: ${file.name}…`, 0);
   if (!window.JSZip) {
