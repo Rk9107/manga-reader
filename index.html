@@ -235,6 +235,40 @@ body{background:radial-gradient(ellipse at 82% 0%,#392328 0,transparent 35%),#0a
 @media(max-width:700px){.continue-panel{grid-template-columns:minmax(0,1fr) 76px;padding:14px;gap:12px}.continue-cover{width:76px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.seriescover{aspect-ratio:3/4}.hero{min-height:205px;padding:22px 18px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:380px){.grid{gap:9px}.info{padding:9px}.info strong{font-size:13px}}
 
+
+/* TORII — Sakura: rosa suave sobre carbón, sin perder la esencia japonesa */
+:root{--bg:#0b090c;--panel:#19151a;--text:#f3eaf0;--muted:#c0b2bd;--line:#40313e;--torii-red:#c98da9;--torii-red-soft:#e0aec3}
+body{background:radial-gradient(ellipse at 82% 0%,#342330 0,transparent 37%),#0b090c;color:#f3eaf0}
+.top{background:#0b090cee;border-bottom-color:#3b2b38}
+.sidebar{background:linear-gradient(180deg,#1b141c,#0b090c);border-color:#443344}
+.side-nav a.active{background:#593448;color:#fff0f6}.side-nav a:hover{background:#2b202c}
+.hero{border-color:#594052}
+.hero-kicker{color:#e1a9c2}
+.torii-whisper{border-color:#d8a5bf35}.torii-whisper-jp{color:#efc4d7}
+.actions button,.tools button{background:#241b25;color:#f4eaf0;border-color:#62475c}
+.actions button.primary,button.primary{background:linear-gradient(135deg,#b87598,#81516f);color:#fff}
+.notice{background:#19141a;border-color:#443344;color:#c4b4c0}
+.continue-panel{border-color:#513c4c;background:linear-gradient(105deg,#211821,#121015 70%,#291d29)}
+.continue-copy h2{color:#f4e7ef}
+.continue-copy .progressline{background:#493846}
+.progressline>i{background:linear-gradient(90deg,#b87598,#e3a9c4)}
+.continue-copy button{background:#9b6686;color:#fff}
+.continue-cover{background:#2a202b;color:#f1dce8}
+.activity-panel{background:linear-gradient(145deg,#1d1720,#110e13);border-color:#443344}
+.activity-metric{border-color:#ffffff14}.activity-metric b{color:#f3e6ef}
+.activity-metric i{background:#c98da9}
+.stat{background:#19151c;border-color:#403142;color:#c7b8c5}.stat b{color:#f3e6ef}
+.collectionhead{border-bottom-color:#493749}
+.collectionhead strong{color:#f3e6ef}.collectionhead .muted{color:#c0b1bd}
+.toolbar input,.toolbar select{background:#19151c;border-color:#49394a;color:#f3eaf0}
+.card{background:#19151c;border-color:#403344}
+.card:hover{border-color:#bd88a8;box-shadow:0 13px 28px #0008}
+.seriescover{background:#241b26}
+.seriescount{background:#171019e8;border-color:#805a76;color:#f8eaf2}
+.info strong{color:#f3e6ef}.info .meta{color:#c4b4c1}.serieshint{color:#dfa8c2}
+.progressline{background:#49394a}.progressline>i{background:#c98da9}
+.empty{background:#17131a;border-color:#493749;color:#cbbcc8}
+
 </style></head>
 <body>
 <aside class="sidebar"><div class="sidebar-brand"><img src="icon.svg" alt=""><div><strong>TORII</strong><small>La puerta a otros mundos</small></div></div><nav class="side-nav" aria-label="Navegación principal"><a href="#library" data-view="library" class="active"><span>▦</span> Biblioteca</a><a href="#shelfBar" data-view="shelves"><span>▤</span> Estantes</a><a href="#library" data-view="series"><span>▧</span> Series</a><a href="#library" data-view="reading"><span>◷</span> Lecturas</a><a href="#backup" data-view="downloads"><span>↓</span> Respaldos</a><a href="#settings" data-view="settings"><span>⚙</span> Ajustes</a></nav><div class="side-note">Un espacio personal para explorar historias.<br><span style="color:#eee">静かに読もう · Lee a tu ritmo.</span></div></aside><header class="top"><div class="brand"><img src="icon.svg" alt=""><span>TORII</span></div><div class="spacer"></div><input id="fileInput" class="file-picker-native" type="file" aria-label="Añadir tomo" accept=".cbr,.rar,.cbz,.zip,.pdf,.jpg,.jpeg,.png,.webp,.gif,.bmp,application/pdf,image/*" multiple></header>
