@@ -1,7 +1,7 @@
 /* TORII — Service Worker
    Compatible con GitHub Pages en /manga-reader/
 */
-const CACHE_NAME = "torii-shell-v53-banner-refresh";
+const CACHE_NAME = "torii-shell-v54-woodblock-banner";
 
 const APP_SHELL = [
   "./",
@@ -9,7 +9,7 @@ const APP_SHELL = [
   "./manifest.json",
   "./icon.svg",
   "./torii-banner.svg",
-  "./torii-sakura-banner.jpg",
+  "./torii-sakura-banner.jpg?v=woodblock-3",
   "./worker-bundle.js"
 ];
 
@@ -46,7 +46,7 @@ self.addEventListener("fetch", (event) => {
 
   // No interceptar archivos de manga ni descargas del usuario.
   const isAppNavigation = request.mode === "navigate";
-  const isAppAsset = /\.(?:html|css|js|json|svg|png|webp|ico)$/i.test(url.pathname);
+  const isAppAsset = /\.(?:html|css|js|json|svg|png|jpe?g|webp|ico)$/i.test(url.pathname);
 
   if (!isAppNavigation && !isAppAsset) return;
 
